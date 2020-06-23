@@ -19,7 +19,7 @@ Any employee can create a new attendee account.
 
 In order to create a new account, users need to provide an email address and a password.
 
-Passwords must be at least TBD characters long and must contain/cannot contain special characters or TBD regex.
+Passwords must be at least [TBD] characters long and must contain/cannot contain [special characters/TBD regex].
 
 Users must confirm their password before submitting. The form will not be allowed to submit unless the password matches the “confirm password”.
 
@@ -49,17 +49,7 @@ Landing page for organizers will have an extra link to edit courses.
 
 (Waitlist functionality will be real-time)
 
-#### Course Cancellation 
-
-If a user who is signed up for a course is no longer interested, they have the ability to take themselves out of the course.
-
-Users will be prompted to confirm before they cancel (drop) the course.
-
-When a user cancels, a spot in the course will be opened and the number of participants will be updated in real time.
-
-If there are users on the waitlist, the user in waitlist position #1 will be automatically registered into the course.
-
-#### Course Creation
+#### Course Management
 
 Only organizers can create courses. On the courses overview page, organizers will be able to create a new course.
 
@@ -72,12 +62,21 @@ If the course was created successfully, then the organizer should receive a conf
 
 ### Medium Priority 
 
+#### Course Cancellation 
+
+If a user who is signed up for a course is no longer interested, they have the ability to take themselves out of the course.
+
+Users will be prompted to confirm before they cancel (drop) the course.
+
+When a user cancels, a spot in the course will be opened and the number of participants will be updated in real time.
+
+If there are users on the waitlist, the user in waitlist position #1 will be automatically registered into the course.
+
 #### New Account Signup - Approvals
 
 Before accounts are “active”, they must be approved by organizers.
 
 Organizers will be able to set the status of new accounts as “Attendee” or “Organizer”.
-
 
 #### Course Signup - Landing Page (more features)
 
@@ -101,9 +100,7 @@ Below the interested attendees, a list of all waitlisted (did not register as no
 
 Only organizers can delete users (to accommodate when employees leave the company) and create new organizer accounts. 
 
-
 ### Low Priority
-
 #### Reminders
 
 If a user is registered in a course, then the system will send periodic reminders (such as by email) to remind them.
@@ -111,6 +108,7 @@ If a user is registered in a course, then the system will send periodic reminder
 If a user is on the waitlist and is moved to regular registration, then the system will let them know that the change was made.
 
 If the size of a class is changed by an organizer and the amount of registered users exceeds that of the new maximum attendance, then the users who signed up most recently will be moved onto the wait-list and notified accordingly.
+
 (An email API can be used to send reminder emails)
 
 #### Tags
@@ -118,6 +116,7 @@ If the size of a class is changed by an organizer and the amount of registered u
 On the landing page, users can filter through courses by “tags” such as “Time Management”, “Leadership” etc.
 
 Every course will have at least one associated tag.
+
 When an organizer creates a course, they will be able to assign tags to that course.
 
 #### Interested Status
@@ -129,4 +128,3 @@ On the landing page, the number of interested participants is shown.
 The list of interested users is viewable by the organizer. The system will remember that the user is interested for the future.
 
 Users will be able to remove interested status from the landing page if they are no longer interested in a course.
-
