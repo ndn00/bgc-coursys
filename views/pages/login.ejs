@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include ('../partials/header.ejs') %>
+    <link href="stylesheets/login.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+
+    <%- include ('../partials/nav.ejs') %>
+
+    <div class="row">
+        <div class="col-sm-3 mx-auto" id="loginCard">
+            <h1 id="loginTitle">Login</h1>
+            <br>
+        
+            <form id="loginForm">
+                <div class="text-center">
+                    <input type="text" name="uname" placeholder="Email">
+                    <br>
+                    <input type="password" name="pwd" placeholder="Password">
+                    <br>
+                    <input type="submit" value="Sign In" class="btn btn-primary" style="margin-top: 5%">
+                </div>
+            </form>
+        </div>
+    </div>
+    
+
+
+</body>
+</html>

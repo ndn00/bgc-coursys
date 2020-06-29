@@ -22,5 +22,10 @@ app.set('view engine', 'ejs');
 //Landing page path
 //etc.
 
+app.get('/login', (req,res) => {
+    // res.send("Hello World!");
+    res.render('pages/login');
+})
+
 
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
