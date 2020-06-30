@@ -4,8 +4,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 5000;
 
-//Can move database to another file, as needed
-const { Pool } = require('pg');
+//Require databases in other files
 
 //Imported from other folders
 const loginInfo = require('./loginInfo');
@@ -14,7 +13,8 @@ let app = express();
 
 //utilities
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
