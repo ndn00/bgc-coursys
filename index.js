@@ -28,5 +28,6 @@ app.get('/login', (req,res) => {
     res.render('pages/login');
 });
 app.post('/login', loginInfo.authenticate);
+app.post('/newuser', loginInfor.createUser);
 
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
