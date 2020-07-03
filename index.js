@@ -27,6 +27,9 @@ app.get('/login', (req,res) => {
     // res.send("Hello World!");
     res.render('pages/login');
 });
+app.get('/signup', (req,res) => {
+    res.render('pages/signUp');
+});
 app.post('/login', loginInfo.authenticate);
 app.post('/newuser', loginInfor.createUser);
 
