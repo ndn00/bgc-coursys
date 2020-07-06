@@ -1,8 +1,11 @@
 module.exports = {
+  renderLogin: (request, result) => {
+		result.render('pages/login');
+	},
+
   login: (request, result) => {
-    const { user } = request;
-    result.json(user);
-  },
+		result.render('pages/landing');
+	},
 
   logout: (request, result, next) => {
     request.session.destroy((err) => {
@@ -14,7 +17,8 @@ module.exports = {
     });
   },
 
-  ping: (request, result) => {
-    result.sendStatus(200);
+  signup: (request, result) => {
+    res.render('pages/signUp');
   }
+
 }

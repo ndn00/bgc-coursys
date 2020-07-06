@@ -4,7 +4,7 @@ module.exports = {
 	},
 
 	login: (request, result) => {
-		if(request.user.type === 'admin') {
+		if(request.user.type === 'organizer') {
 			result.redirect('/landing');
 		} else {
 			result.redirect('/login');
