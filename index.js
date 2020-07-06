@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 5000;
 //Require databases in other files
 
 //Imported from other folders
-const loginInfo = require('./loginInfo');
+
 
 let app = express();
 
@@ -30,7 +30,6 @@ app.get('/login', (req,res) => {
 app.get('/signup', (req,res) => {
     res.render('pages/signUp');
 });
-app.post('/login', loginInfo.authenticate);
-app.post('/newuser', loginInfor.createUser);
+
 
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
