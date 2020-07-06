@@ -1,22 +1,23 @@
 //Dependencies
 const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
+const passport = require('passport');
 const PORT = process.env.PORT || 5000;
-
-//Require databases in other files
-
-//Imported from other folders
-
 
 let app = express();
 
-//utilities
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+//Require databases in other files
+const db = require('./db');
+
+//Imported from other folders
+require('./config/passport')(passport, db);
+require('./config/express')(app, passport, db.pool);
+require('./config/routes')(app, passport, db);
+
+app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
+
+
+
+
 
 //paths
 //login path
@@ -30,6 +31,3 @@ app.get('/login', (req,res) => {
 app.get('/signup', (req,res) => {
     res.render('pages/signUp');
 });
-
-
-app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
