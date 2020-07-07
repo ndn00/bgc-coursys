@@ -1,6 +1,10 @@
 module.exports = {
   renderLogin: (request, result) => {
-		result.render('pages/login');
+    console.log("called renderLogin");
+    result.render('pages/login');
+
+
+
 	},
 
   login: (request, result) => {

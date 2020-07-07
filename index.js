@@ -1,6 +1,7 @@
 //Dependencies
 const express = require('express');
 const passport = require('passport');
+const dotenv = require('dotenv').config();
 const PORT = process.env.PORT || 5000;
 
 let app = express();

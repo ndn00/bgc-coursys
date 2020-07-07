@@ -3,8 +3,8 @@ const bodyParser = require('body-parser');
 const express = require('express');
 //add form validation later
 //const expressValidator = require('express-validator');
-//const session = require('express-session');
-//const pgSession = require('connect-pg-simple')(session);
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const cookieParser = require('cookie-parser');
 const methodOverride = require('method-override');
 const config = require('./');
@@ -32,14 +32,16 @@ module.exports = (app, passport, pool) => {
   }));
 
   //app.use(cookieParser());
-  /*app.use(session({
+
+
+  app.use(session({
     store: new pgSession({
       pool
     }),
-    secret: '',
+    secret: 'test',
     resave: false,
     cookie: { maxAge: 14 * 24 * 3600 * 1000}
-  }));*/
+  }));
 
   //passport.js setup
   app.use(passport.initialize());

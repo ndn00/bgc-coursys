@@ -28,7 +28,7 @@ module.exports = (passport, database) => {
   });
 
   passport.deserializeUser((id, callback) => {
-    db.query('SELECT id, email, type FROM users WHERE id=$1;', [parseInt(id, 10)], (err, result) => {
+    database.query('SELECT id, email, type FROM users WHERE id=$1;', [parseInt(id, 10)], (err, result) => {
       if (err) {
         console.log("Error on selecting user on session deserialize");
         return callback(err);
