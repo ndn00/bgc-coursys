@@ -7,7 +7,7 @@ const saltRounds = 10;
 
 module.exports = {
   renderLogin: (request, result) => {
-    console.log("called renderLogin");
+
     result.render('pages/login');
 
 
@@ -15,7 +15,8 @@ module.exports = {
 	},
 
   login: (request, result) => {
-		result.render('pages/landing');
+    console.log("called login");
+    result.render('pages/landing');
 	},
 
   /*logout: (request, result, next) => {
