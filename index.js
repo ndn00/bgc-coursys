@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 5000;
 let app = express();
 
 //Require databases in other files
-const db = require('./db');
+const db = require('./database');
 
 //Imported from other folders
 require('./config/passport')(passport, db);

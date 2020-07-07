@@ -1,6 +1,6 @@
 const path = require('path');
 
-const environment = require('./environment/index');
+const environment = require('./environment/environment');
 
 const defaults = {
   root: path.join(__dirname, '..')

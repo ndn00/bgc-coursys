@@ -7,7 +7,7 @@ module.exports = {
 		result.render('pages/landing');
 	},
 
-  logout: (request, result, next) => {
+  /*logout: (request, result, next) => {
     request.session.destroy((err) => {
       if (err) {
         return next(err);
@@ -15,10 +15,10 @@ module.exports = {
       request.logout();
       result.sendStatus(200);
     });
-  },
+  },*/
 
   signup: (request, result) => {
-    res.render('pages/signUp');
+    result.render('pages/signUp');
   }
 
 }
