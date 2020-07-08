@@ -1,3 +1,7 @@
+//express.js
+//Adapted from https://github.com/DayOnePl/dos-server/blob/master/config/express.js
+//Express setup
+
 const path = require('path');
 const bodyParser = require('body-parser');
 const express = require('express');
@@ -30,6 +34,7 @@ module.exports = (app, passport, pool) => {
     }
   }));
 
+  //sessions - manage login state
   app.use(session({
     store: new pgSession({
       pool
