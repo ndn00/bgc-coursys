@@ -10,27 +10,20 @@ const saltRounds = 10;
 
 
 module.exports = {
-  //display login
-  renderLogin: (request, result) => {
+
+  //all login cases
+  //if logged in (or submit valid login credentials), redirect to appropriate landing page
+  //otherwise, render login page
+  login: (request, result) => {
+    if (request.user) {
+      if (request.user.type === 'attendee') {
+        return result.redirect('/main');
+      } else if (request.user.type === 'organizer') {
+        return result.redirect('/organizer/main');
+      }
+    }
     result.render('pages/login');
 	},
-
-  //handle successful login
-  login: (request, result) => {
-    if (request.user.type === 'attendee') {
-      result.redirect('/main')
-    } else if (request.user.type === 'organizer') {
-      result.redirect('/organizer/main');
-    } else {
-      result.redirect('/login');
-    }
-	},
-
-  //test function
-  isLoggedIn: (request, result) => {
-    console.log("I got called");
-    result.json(request.user);
-  },
 
   //NOTE: dummy data (will code database storage later)
   landing: (request, result) => {
@@ -45,11 +38,7 @@ module.exports = {
             delivery: "Remote", time: "5:30pm, July 8th, 2020",
             seats: 86, maxSeats: 100, status: "Enrolled",
         },
-        {
-          title: request.user.id, topic: request.user.email,
-          delivery: "Remote", time: "6:00 pm, July 4, 2020",
-          seats: 45, maxSeats: 50, status: request.user.type,
-        }
+
     ];
     result.render('pages/index', { data: data });
   },

@@ -25,12 +25,7 @@ module.exports = {
             delivery: "Remote", time: "5:30pm, July 8th, 2020",
             seats: 86, maxSeats: 100, status: "Enrolled",
         },
-				//testing block - remove for production
-				{
-          title: request.user.id, topic: request.user.email,
-          delivery: "Remote", time: "6:00 pm, July 4, 2020",
-          seats: 45, maxSeats: 50, status: request.user.type,
-        }
+				
     ];
     result.render('pages/index', { data: data });
   },

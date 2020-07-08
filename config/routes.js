@@ -9,14 +9,11 @@ const users = require('../userTypes/users');
 
 module.exports = (app, passport, database) => {
   //login and logout
-  app.get('/login', users.renderLogin);
+  app.get('/login', users.login);
   app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), users.login);
   app.get('/logout', users.logout);
 
-  //testing function
-  app.get('/isLoggedIn', auth.requiresLogin, users.isLoggedIn);
-
-  //Landing page - MANUALLY MERGED
+  //Landing page
   app.get('/main', auth.requiresLogin, users.landing);
 
   //create new user of attendee status
