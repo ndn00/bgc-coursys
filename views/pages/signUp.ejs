@@ -15,14 +15,15 @@
             <h1 id="loginTitle">Sign Up</h1>
             <br>
         
-            <form id="loginForm" method="POST" action="/newuser">
+            <form id="loginForm" method="POST" action="/newuser" onsubmit="return validateForm()">
                 <div class="text-center">
-                    <input type="email" name="uname" placeholder="Email">
+                    <input type="email" name="uname" placeholder="Email" required="true">
                     <br>
-                    <input type="password" name="pwd" placeholder="Password">
+                    <input type="password" name="pwd" placeholder="Password" required="true">
                     <br>
                     <input type="submit" value="Sign In" class="btn btn-primary" style="margin-top: 5%">
                     <br>
+
                     Your password must contain:
                     <ul>
                         <li>At Least 8 Characters</li>
@@ -34,8 +35,41 @@
             </form>
         </div>
     </div>
-    
-
+    <br>
+    <div id="errorMsgs">
+        <p id="emailError"></p>
+        <p id="pwdError"></p>
+    </div>
 
 </body>
+
+<script>
+    function validateForm() {
+        let form = document.forms["loginForm"];
+        let emailValidation = /[^(@|\s)]+@bgcengineering\.ca/;
+        let pwdValidation = /^.*(?=.{8,})(?=.*[a-z])(?=.*\d)(?=.*[A-Z]).*$/;
+
+        let isEmailValid = emailValidation.test(form["uname"].value);
+        let isPwdValid = pwdValidation.test(form["pwd"].value);
+
+        if (!isEmailValid) {
+            // let paragraph = document.createElement("p");
+            // let errorMsg = document.createTextNode("Email must be a BGC email");
+            // para.appendChild(errorMsg);
+            // document.getElementById("errorMsgs").appendChild(para);
+            document.getElementById("emailError").innerHTML="Email must be BGC email";
+        }
+        if (!isPwdValid) {
+            // let paragraph = document.createElement("p");
+            // let errorMsg = document.createTextNode("Password does not meet criteria");
+            // para.appendChild(errorMsg);
+            // document.getElementById("errorMsgs").appendChild(para);
+            document.getElementById("pwdError").innerHTML="Password does not meet criteria";
+        }
+        if (!isEmailValid || !isPwdValid) return false;
+
+
+        return true;
+    }
+</script>
 </html>
