@@ -4,7 +4,7 @@
 
 
 const auth = require('./middleware/auth');
-//const organizer = require('../userTypes/organizer');
+const organizer = require('../userTypes/organizer');
 const users = require('../userTypes/users');
 
 module.exports = (app, passport, database) => {
@@ -19,12 +19,13 @@ module.exports = (app, passport, database) => {
   //Landing page - MANUALLY MERGED
   app.get('/main', auth.requiresLogin, users.landing);
 
-  //create new user
+  //create new user of attendee status
   app.get('/newuser', users.signup);
   app.post('/newuser', users.createAccount);
 
-  //display landing page
-  //app.get('/landing')
+
+  //organizer-only paths
+  app.get('/organizer/main', auth.requiresOrganizer, organizer.landing);
 
   //add additional routes that require authentication to access, else they will be redirected to login
 

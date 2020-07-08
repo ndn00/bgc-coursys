@@ -17,7 +17,13 @@ module.exports = {
 
   //handle successful login
   login: (request, result) => {
-    result.redirect('/main');
+    if (request.user.type === 'attendee') {
+      result.redirect('/main')
+    } else if (request.user.type === 'organizer') {
+      result.redirect('/organizer/main');
+    } else {
+      result.redirect('/login');
+    }
 	},
 
   //test function
@@ -39,6 +45,11 @@ module.exports = {
             delivery: "Remote", time: "5:30pm, July 8th, 2020",
             seats: 86, maxSeats: 100, status: "Enrolled",
         },
+        {
+          title: request.user.id, topic: request.user.email,
+          delivery: "Remote", time: "6:00 pm, July 4, 2020",
+          seats: 45, maxSeats: 50, status: request.user.type,
+        }
     ];
     result.render('pages/index', { data: data });
   },
