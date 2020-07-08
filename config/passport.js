@@ -18,7 +18,7 @@ module.exports = (passport, database) => {
       }
       if (dbres.rows.length > 0) {
         const resultRow = dbres.rows[0];
-        console.log(resultRow);
+        //console.log(resultRow);
         //check to see whether user-entered password matches stored (hashed) password
         bcrypt.compare(password, resultRow.password, function(err, hashres) {
           if (hashres) {
