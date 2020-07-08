@@ -17,7 +17,7 @@ module.exports = {
 
   //handle successful login
   login: (request, result) => {
-    result.render('pages/landing');
+    result.redirect('/main');
 	},
 
   //test function
