@@ -34,5 +34,6 @@ module.exports = (app, passport, database) => {
 
   // create new course
   app.get('/newcourse', courses.renderNewCourse);
+  app.post('/newcourse', courses.submitNewCourse);
 
 }
