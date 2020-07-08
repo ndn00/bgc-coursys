@@ -1,15 +1,20 @@
-const {requiresLogin, requiresOrganizer } = require('./middleware/auth');
+//routes.js
+//adapted from https://github.com/DayOnePl/dos-server/blob/master/config/routes.js
+//API for website
+
+
+const auth = require('./middleware/auth');
 //const organizer = require('../userTypes/organizer');
 const users = require('../userTypes/users');
 
 module.exports = (app, passport, database) => {
-
-  
-
   //login and logout
   app.get('/login', users.renderLogin);
   app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), users.login);
-  //app.get('/logout', users.logout);
+  app.get('/logout', users.logout);
+
+  //testing function
+  app.get('/isLoggedIn', auth.requiresLogin, users.isLoggedIn);
 
   //create new user
   app.get('/newuser', users.signup);

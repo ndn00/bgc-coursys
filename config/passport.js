@@ -1,8 +1,13 @@
+//passport.js
+//adapted from https://github.com/DayOnePl/dos-server/blob/master/config/passport.js
+//Implements passport local strategy (authentication: checks if email and password match stored values)
+
 const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local').Strategy;
 
 module.exports = (passport, database) => {
   passport.use(new LocalStrategy({
+    //make sure names are consistent
     usernameField: 'uname',
     passwordField: 'pwd'
   }, (email, password, callback) => {
@@ -14,6 +19,7 @@ module.exports = (passport, database) => {
       if (dbres.rows.length > 0) {
         const resultRow = dbres.rows[0];
         console.log(resultRow);
+        //check to see whether user-entered password matches stored (hashed) password
         bcrypt.compare(password, resultRow.password, function(err, hashres) {
           if (hashres) {
             callback(null, { id: resultRow.id, email: resultRow.email, type: resultRow.type});

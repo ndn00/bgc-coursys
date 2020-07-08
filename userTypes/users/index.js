@@ -1,3 +1,7 @@
+//index.js
+//Handles implementations of all user paths
+//NOTE: this may be split into several sub-files as scope increases
+
 const database = require('../../database');
 
 //password storage setup
@@ -6,20 +10,23 @@ const saltRounds = 10;
 
 
 module.exports = {
+  //display login
   renderLogin: (request, result) => {
-
     result.render('pages/login');
-
-
-
 	},
 
+  //handle successful login
   login: (request, result) => {
-    console.log("called login");
     result.render('pages/landing');
 	},
 
-  /*logout: (request, result, next) => {
+  //test function
+  isLoggedIn: (request, result) => {
+    console.log("I got called");
+    result.json(request.user);
+  },
+
+  logout: (request, result, next) => {
     request.session.destroy((err) => {
       if (err) {
         return next(err);
@@ -27,12 +34,14 @@ module.exports = {
       request.logout();
       result.sendStatus(200);
     });
-  },*/
+  },
 
+  //render signup page
   signup: (request, result) => {
     result.render('pages/signUp');
   },
 
+  //create new account from email + password
   createAccount: (request, result) => {
     //do regular expression checks
     let emailRegex = /[^(@|\s)]+@bgcengineering.ca/;
