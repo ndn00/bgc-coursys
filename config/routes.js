@@ -6,6 +6,7 @@
 const auth = require('./middleware/auth');
 //const organizer = require('../userTypes/organizer');
 const users = require('../userTypes/users');
+const courses = require('../userTypes/courses');
 
 module.exports = (app, passport, database) => {
   //login and logout
@@ -22,6 +23,7 @@ module.exports = (app, passport, database) => {
   //create new user
   app.get('/newuser', users.signup);
   app.post('/newuser', users.createAccount);
+  
 
   //display landing page
   //app.get('/landing')
@@ -29,4 +31,8 @@ module.exports = (app, passport, database) => {
   //add additional routes that require authentication to access, else they will be redirected to login
 
   //admin section unused for now
+
+  // create new course
+  app.get('/newcourse', courses.renderNewCourse);
+
 }
