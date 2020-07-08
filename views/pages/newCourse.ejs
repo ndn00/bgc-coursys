@@ -8,11 +8,24 @@
 
 <body>
 
-    <form id="loginForm" method="POST" action="/newcourse">
+    <form id="courseForm" method="POST" action="/newcourse" onsubmit="return validateForm()">
         <%- include ('../partials/courseForm.ejs') %>
     </form>
 
 
 
 </body>
+<script>
+    function validateForm() {
+        let form = document.forms["courseForm"];
+        let startDateTime = new Date(form["startdate"].value + ' ' + form["starttime"].value);
+        let endDateTime = new Date(form["enddate"].value + ' ' + form["endtime"].value);
+        if (startDateTime > endDateTime) {
+            alert("End time of course must be after the start");
+            return false;
+        }
+
+        return true;
+    }
+</script>
 </html>
