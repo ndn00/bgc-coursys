@@ -26,6 +26,23 @@ module.exports = {
     result.json(request.user);
   },
 
+  //NOTE: dummy data (will code database storage later)
+  landing: (request, result) => {
+    var data = [
+        {
+            title: "CMPT276", topic: "Computer Science",
+            delivery: "Remote", time: "5:30pm, July 8th, 2020",
+            seats: 86, maxSeats: 100, status: "Enrolled",
+        },
+        {
+            title: "CMPT276", topic: "Computer Science",
+            delivery: "Remote", time: "5:30pm, July 8th, 2020",
+            seats: 86, maxSeats: 100, status: "Enrolled",
+        },
+    ];
+    result.render('pages/index', { data: data });
+  },
+
   logout: (request, result, next) => {
     request.session.destroy((err) => {
       if (err) {

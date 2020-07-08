@@ -16,6 +16,9 @@ module.exports = (app, passport, database) => {
   //testing function
   app.get('/isLoggedIn', auth.requiresLogin, users.isLoggedIn);
 
+  //Landing page - MANUALLY MERGED
+  app.get('/main', auth.requiresLogin, users.landing);
+
   //create new user
   app.get('/newuser', users.signup);
   app.post('/newuser', users.createAccount);

@@ -8,13 +8,11 @@
 
 <body>
 
-    <%- include ('../partials/nav.ejs') %>
-
     <div class="row">
         <div class="col-sm-3 mx-auto" id="loginCard">
             <h1 id="loginTitle">Sign Up</h1>
             <br>
-        
+
             <form id="loginForm" method="POST" action="/newuser" onsubmit="return validateForm()">
                 <div class="text-center">
                     <input type="email" name="uname" placeholder="Email" required="true">
