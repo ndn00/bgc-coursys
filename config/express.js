@@ -5,7 +5,6 @@ const express = require('express');
 //const expressValidator = require('express-validator');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const cookieParser = require('cookie-parser');
 const methodOverride = require('method-override');
 const config = require('./');
 
@@ -31,16 +30,15 @@ module.exports = (app, passport, pool) => {
     }
   }));
 
-  //app.use(cookieParser());
-
-
   app.use(session({
     store: new pgSession({
       pool
     }),
     secret: 'test',
     resave: false,
-    cookie: { maxAge: 14 * 24 * 3600 * 1000}
+    saveUninitialized: false,
+    //1 h = 3600 s * 1000 ms
+    cookie: { maxAge: 3600 * 1000}
   }));
 
   //passport.js setup
