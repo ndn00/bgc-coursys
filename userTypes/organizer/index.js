@@ -49,5 +49,9 @@ module.exports = {
 		result.render('pages/redirect', { redirect: '/organizer/main', message: 'User data has been successfully updated!', target: 'the main courses page'});
 	},
 
+	newCourse: (request, result) => {
+		result.render('pages/newCourse');
+	}
+
 
 }
