@@ -24,11 +24,11 @@ module.exports = (passport, database) => {
           if (hashres) {
             callback(null, { id: resultRow.id, email: resultRow.email, type: resultRow.type});
           } else {
-            callback(null, false);
+            callback(null, false, { message: "Authentication error: incorrect email or password." });
           }
         })
       } else {
-        callback(null, false);
+        callback(null, false, { message: "Authentication error: incorrect email or password." });
       }
     });
   }));

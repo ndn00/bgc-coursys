@@ -23,8 +23,17 @@ module.exports = (app, passport, database) => {
 
   //organizer-only paths
   app.get('/organizer/main', auth.requiresOrganizer, organizer.landing);
+  //app.get('/organizer/allusers', auth.requiresOrganizer, organizer.allusers);
+  //add option for change status of members
+
 
   //add additional routes that require authentication to access, else they will be redirected to login
+  //view course details -> need identifier
+  //edit course details -> need identifier
+
+
+
+
 
   //admin section unused for now
 }

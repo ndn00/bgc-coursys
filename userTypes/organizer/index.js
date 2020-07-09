@@ -25,9 +25,9 @@ module.exports = {
             delivery: "Remote", time: "5:30pm, July 8th, 2020",
             seats: 86, maxSeats: 100, status: "Enrolled",
         },
-				
+
     ];
-    result.render('pages/index', { data: data });
+    result.render('pages/orgIndex', { data: data });
   },
 	//as of now, organizer accounts must be manually created
 
