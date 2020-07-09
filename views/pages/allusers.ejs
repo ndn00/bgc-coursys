@@ -5,12 +5,18 @@
     <%- include('../partials/header.ejs') %>
   </head>
   <body>
+    <style type="text/css">
+      .borderlessInput {
+        background-color: transparent;
+        border: transparent;
+      }
 
+    </style>
     <%- include('../partials/orgNav.ejs') %>
 
     <div class="container">
       <h2>Modify User Status</h2>
-      <form id="modifyUser" action="/organizer/allusers" method="put">
+      <form id="modifyUser" action="/organizer/allusers" method="post">
         <table class="table table-striped">
           <thead>
             <tr>
@@ -23,8 +29,12 @@
           <% userData.forEach((user) => { %>
             <% if (user.email !== curUser) {%>
             <tr>
-              <th scope='row'><%= user.id %></th>
-              <td><%= user.email %></td>
+              <th scope='row'>
+                <input type="number" class="borderlessInput" size="4" name=<%= user.id + "id" %> value=<%= user.id %> readonly>
+              </th>
+              <td>
+                <input type="email" class="borderlessInput" size="50" name=<%= user.id + "email" %> value=<%= user.email %>>
+              </td>
               <td>
                 <% if (user.type === 'organizer') {%>
                 <div>
@@ -51,6 +61,12 @@
           <% }); %>
           </tbody>
         </table>
+
+        <% if (userData.length > 0) { %>
+          <input type="submit" class="btn btn-dark" name="updateUserData" value="Update User Data">
+        <% } else { %>
+          <p>Database contains no other users so cannot update.</p>
+        <% } %>
 
 
       </form>

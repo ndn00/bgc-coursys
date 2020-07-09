@@ -39,7 +39,9 @@ module.exports = {
 	},
 
 	updateUsers: (request, result) => {
-		result.json("Work in progress");
+		console.log("I got called!");
+
+		result.render('pages/redirect', { redirect: '/organizer/main', message: 'User data has been successfully updated!', target: 'the main courses page'});
 	},
 
 
