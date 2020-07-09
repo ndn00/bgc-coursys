@@ -27,6 +27,15 @@ module.exports = {
 
   //NOTE: dummy data (will code database storage later)
   landing: (request, result) => {
+    let queryCourse = `
+    SELECT (id, course_name, topic, location,start_date,end_date,
+            seat_capacity, e.position)
+    FROM courses, enrollment e
+    WHERE start_date >= CURRENT_DATE;
+    `;
+    
+    SELECT
+    `
     var data = [
         {
             title: "CMPT276", topic: "Computer Science",
