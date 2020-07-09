@@ -25,7 +25,8 @@ module.exports = (app, passport, database) => {
 
   //organizer-only paths
   app.get('/organizer/main', auth.requiresOrganizer, organizer.landing);
-  //app.get('/organizer/allusers', auth.requiresOrganizer, organizer.allusers);
+  app.get('/organizer/allusers', auth.requiresOrganizer, organizer.allusers);
+  app.put('/organizer/allusers', auth.requiresOrganizer, organizer.updateUsers);
   //add option for change status of members
 
 

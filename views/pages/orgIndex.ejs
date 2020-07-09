@@ -40,8 +40,7 @@
             <th scope="col">Seats</th>
             <th scope="col">Status</th>
             <th scope="col">Actions</th>
-            <th scope="col">Organizer Edit Course</th>
-            <th scope="col">Organizer Delete Course</th>
+
           </tr>
         </thead>
         <tbody>
@@ -57,12 +56,8 @@
             <td>
               <i class="material-icons md-24">add_circle_outline</i>
               <i class="material-icons md-24">star_outline</i>
-            </td>
-            <td>
-              <a href="#"><button type="button" name="edit1Button">Edit Course</button></a>
-            </td>
-            <td>
-              <a href="#"><button type="button" name="delete1Button">Delete Course</button></a>
+              <a href="#"><i class="material-icons md-24">edit</i></a>
+              <a href="#"><i class="material-icons md-24">delete</i></a>
             </td>
           </tr>
           <tr>
@@ -76,12 +71,8 @@
             <td>
               <i class="material-icons md-24">add_circle</i>
               <i class="material-icons md-24">star</i>
-            </td>
-            <td>
-              <a href="#"><button type="button" name="edit2Button">Edit Course</button></a>
-            </td>
-            <td>
-              <a href="#"><button type="button" name="delete2Button">Delete Course</button></a>
+              <a href="#"><i class="material-icons md-24">edit</i></a>
+              <a href="#"><i class="material-icons md-24">delete</i></a>
             </td>
           </tr>
           <tr>
@@ -95,12 +86,8 @@
             <td>
               <i class="material-icons md-24">add_circle</i>
               <i class="material-icons md-24">star</i>
-            </td>
-            <td>
-              <a href="#"><button type="button" name="edit3Button">Edit Course</button></a>
-            </td>
-            <td>
-              <a href="#"><button type="button" name="delete3Button">Delete Course</button></a>
+              <a href="#"><i class="material-icons md-24">edit</i></a>
+              <a href="#"><i class="material-icons md-24">delete</i></a>
             </td>
           </tr>
           <!-- row template -->
@@ -116,12 +103,8 @@
             <td>
               <i class="material-icons md-24">add_circle</i>
               <i class="material-icons md-24">star</i>
-            </td>
-            <td>
-              <a href="#"><button type="button" name=<%= index + "rowEditButton"%>>Edit Course</button></a>
-            </td>
-            <td>
-              <a href="#"><button type="button" name=<%= index + "rowDeleteButton"%>>Delete Course</button></a>
+              <a href="#"><i class="material-icons md-24">edit</i></a>
+              <a href="#"><i class="material-icons md-24">delete</i></a>
             </td>
           </tr>
           <% }); %>

@@ -1,5 +1,7 @@
 //index.js
 //handles organizer-only functions
+const database = require('../../database');
+
 
 module.exports = {
 
@@ -23,8 +25,22 @@ module.exports = {
     result.render('pages/orgIndex', { data: data });
   },
 	//as of now, organizer accounts must be manually created
+	allusers: (request, result) => {
+		//access database
+		database.query('SELECT id, email, type FROM users;', (err, dbRes) => {
+			if (err) {
+				return result.json("Could not retrieve database values to show all users");
+			}
+			//pass in data to render
+			return result.render('pages/allusers', { userData: dbRes.rows });
+		});
 
-	//stub for user access control page
+
+	},
+
+	updateUsers: (request, result) => {
+		result.json("Work in progress");
+	},
 
 
 }

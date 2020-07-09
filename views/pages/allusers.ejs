@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <%- include('../partials/header.ejs') %>
+  </head>
+  <body>
+
+    <%- include('../partials/orgNav.ejs') %>
+
+    <div class="container">
+      <h2>Modify User Status</h2>
+      <form id="modifyUser" action="/organizer/allusers" method="put">
+        <table>
+          <thead>
+            <tr>
+              <th scope='col'>ID</th>
+              <th scope='col'>Email</th>
+              <th scope='col'>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+          <% userData.forEach((user) => { %>
+            <tr>
+              <th scope='row'><%= user.id %></th>
+              <td><%= user.email %></td>
+              <td>
+                <% if (user.type === 'organizer') {%>
+                <div>
+                  <input type="radio" name=<%= user.id + "status" %> value="organizer" checked>
+                  <label for="organizer">Organizer</label>
+                </div>
+                <div>
+                  <input type="radio" name=<%= user.id + "status" %>  value="attendee">
+                  <label for="attendee">Attendee</label>
+                </div>
+                <% } else { %>
+                  <div>
+                    <input type="radio" name=<%= user.id + "status" %> value="organizer">
+                    <label for="organizer">Organizer</label>
+                  </div>
+                  <div>
+                    <input type="radio" name=<%= user.id + "status" %>  value="attendee" checked>
+                    <label for="attendee">Attendee</label>
+                  </div>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+          </tbody>
+        </table>
+
+
+      </form>
+    </div>
+
+  </body>
+</html>
