@@ -4,13 +4,6 @@
 module.exports = {
 
 	//add organizer-only functions here
-	login: (request, result) => {
-		if(request.user.type === 'organizer') {
-			result.redirect('/organizer/main');
-		} else {
-			result.redirect('/organizer/login');
-		}
-	},
 
 	//dummy data + will need to build links to organizer-only features
 	landing: (request, result) => {
@@ -30,6 +23,8 @@ module.exports = {
     result.render('pages/orgIndex', { data: data });
   },
 	//as of now, organizer accounts must be manually created
+
+	//stub for user access control page
 
 
 }
