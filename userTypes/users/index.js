@@ -50,7 +50,7 @@ module.exports = {
         return next(err);
       }
       request.logout();
-      result.sendStatus(200);
+      result.render('pages/redirect', { redirect: '/login', message: 'Logged out successfully!', target: 'the login page'});
     });
   },
 
@@ -102,7 +102,7 @@ module.exports = {
             if (errInDB) {
               return result.json("Database error - could not insert");
             }
-            return result.json("Successfully inserted");
+            return result.render("pages/redirect", { redirect: '/login', message: 'New account created successfully!', target: 'the login page'});
           });
         });
       }

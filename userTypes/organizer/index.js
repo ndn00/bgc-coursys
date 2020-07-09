@@ -34,13 +34,18 @@ module.exports = {
 			//pass in data to render
 			return result.render('pages/allusers', { userData: dbRes.rows, curUser: request.user.email });
 		});
-
-
 	},
 
 	updateUsers: (request, result) => {
-		console.log("I got called!");
+		let tableSize = parseInt(request.body.tableSize, 10);
+		for (let i = 1; i <= tableSize; i++) {
+			if (request.body["id" + i]) {
+				console.log("Ok" + i);
+				//update database, set type to organizer for users
 
+				//update database, set type to attendee for users
+			}
+		}
 		result.render('pages/redirect', { redirect: '/organizer/main', message: 'User data has been successfully updated!', target: 'the main courses page'});
 	},
 
