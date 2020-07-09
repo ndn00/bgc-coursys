@@ -22,6 +22,7 @@ module.exports = {
         return result.redirect('/organizer/main');
       }
     }
+    //console.log(result);
     result.render('pages/login');
 	},
 

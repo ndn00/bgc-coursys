@@ -12,7 +12,7 @@ module.exports = (app, passport, database) => {
   //login and logout
   app.get('/login', users.login);
   app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), users.login);
-  app.get('/logout', users.logout);
+  app.get('/logout', auth.requiresLogin, users.logout);
 
   //Landing page
   app.get('/main', auth.requiresLogin, users.landing);
@@ -20,7 +20,7 @@ module.exports = (app, passport, database) => {
   //create new user of attendee status
   app.get('/newuser', users.signup);
   app.post('/newuser', users.createAccount);
-  
+
 
 
   //organizer-only paths
