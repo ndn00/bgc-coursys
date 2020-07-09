@@ -1,72 +1,83 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <%- include ('../partials/header.ejs') %>
-    <link href="stylesheets/login.css" rel="stylesheet" type="text/css">
 
+<head>
+  <%- include ('../partials/header.ejs') %>
 </head>
 
 <body>
 
-    <div class="row">
-        <div class="col-sm-3 mx-auto" id="loginCard">
-            <h1 id="loginTitle">Sign Up</h1>
-            <br>
-            <form id="loginForm" method="POST" action="/newuser" onsubmit="return validateForm()">
-                <div class="text-center">
-                    <input type="email" name="uname" placeholder="Email" required="true">
-                    <br>
-                    <input type="password" name="pwd" placeholder="Password" required="true">
-                    <br>
-                    <input type="submit" value="Sign In" class="btn btn-primary" style="margin-top: 5%">
-                    <br>
-
-                    Your password must contain:
-                    <ul>
-                        <li>At Least 8 Characters</li>
-                        <li>At Least 1 Uppercase Character</li>
-                        <li>At Least 1 Lowercase Character</li>
-                        <li>At Least 1 Number</li>
-                    </ul>
-                </div>
-            </form>
+  <div class="container">
+    <div class="row align-items-center justify-content-center mt-5" id="loginCard">
+      <div class="col-8 col-sm-6 text-center">
+        <h1>BGC Coursys Signup</h1>
+        <div class="mt-5">
+          <form id="signupForm" method="POST" action="/newuser" onsubmit="return validate()">
+            <div class="input-group justify-content-center flex-column">
+              <div class="mb-2">
+                <input type="email" class="form-control" name="uname" placeholder="Email" />
+                <small id="email-check" class=" form-text text-left d-none text-danger">
+                  * Must be a valid BGC email
+                </small>
+              </div>
+              <div>
+                <input type="password" class="form-control" name="pwd" placeholder="Password" />
+                <small id="passwordHelpBlock" class="form-text text-muted mb-3">
+                  <div class="pw-check d-none text-danger text-left">* Must be at Least 8 Characters</div>
+                  <div class="pw-check d-none text-danger text-left">* Must be at Least 1 Uppercase Character</div>
+                  <div class="pw-check d-none text-danger text-left">* Must be at Least 1 Lowercase Character</div>
+                  <div class="pw-check d-none text-danger text-left">* Must be at Least 1 Number</div>
+                </small>
+              </div>
+              <input type="submit" value="Sign Up" class="btn btn-dark" />
+            </div>
+          </form>
         </div>
+      </div>
     </div>
-    <br>
-    <div id="errorMsgs">
-        <p id="emailError"></p>
-        <p id="pwdError"></p>
-    </div>
+  </div>
+
 
 </body>
 
 <script>
-    function validateForm() {
-        let form = document.forms["loginForm"];
-        let emailValidation = /[^(@|\s)]+@bgcengineering\.ca/;
-        let pwdValidation = /^.*(?=.{8,})(?=.*[a-z])(?=.*\d)(?=.*[A-Z]).*$/;
+  // checkers
+  function checkEmail(input) {
+    let emailValidation = /[^(@|\s)]+@bgcengineering\.ca/;
+    if (!emailValidation.test(input))
+      $("#email-check").removeClass('d-none');
+    else $("#email-check").addClass('d-none');
+    return $("#email-check").hasClass('d-none');
+  }
+  function checkPwd(input) {
+    var $pc = $(".pw-check");
+    if (input.length < 8)
+      $pc.eq(0).removeClass('d-none');
+    else
+      $pc.eq(0).addClass('d-none');
+    if (!input.match(/[A-Z]/g))
+      $pc.eq(1).removeClass('d-none');
+    else
+      $pc.eq(1).addClass('d-none');
+    if (!input.match(/[a-z]/g))
+      $pc.eq(2).removeClass('d-none');
+    else
+      $pc.eq(2).addClass('d-none');
+    if (!input.match(/[0-9]/g))
+      $pc.eq(3).removeClass('d-none');
+    else
+      $pc.eq(3).addClass('d-none');
+    return ($pc.filter('.d-none').length == $pc.length);
+  }
+  function validate() {
+    return checkEmail(form['uname'].value) && checkPwd(form['pwd'].value);
+  }
 
-        let isEmailValid = emailValidation.test(form["uname"].value);
-        let isPwdValid = pwdValidation.test(form["pwd"].value);
+  // event listeners
+  var form = document.getElementById('signupForm');
+  form['uname'].addEventListener('keyup', () => { checkEmail(form['uname'].value); });
+  form['pwd'].addEventListener('keyup', () => { checkPwd(form['pwd'].value); })
 
-        if (!isEmailValid) {
-            // let paragraph = document.createElement("p");
-            // let errorMsg = document.createTextNode("Email must be a BGC email");
-            // para.appendChild(errorMsg);
-            // document.getElementById("errorMsgs").appendChild(para);
-            document.getElementById("emailError").innerHTML="Email must be BGC email";
-        }
-        if (!isPwdValid) {
-            // let paragraph = document.createElement("p");
-            // let errorMsg = document.createTextNode("Password does not meet criteria");
-            // para.appendChild(errorMsg);
-            // document.getElementById("errorMsgs").appendChild(para);
-            document.getElementById("pwdError").innerHTML="Password does not meet criteria";
-        }
-        if (!isEmailValid || !isPwdValid) return false;
-
-
-        return true;
-    }
 </script>
+
 </html>
