@@ -32,7 +32,7 @@ module.exports = {
 				return result.json("Could not retrieve database values to show all users");
 			}
 			//pass in data to render
-			return result.render('pages/allusers', { userData: dbRes.rows });
+			return result.render('pages/allusers', { userData: dbRes.rows, curUser: request.user.email });
 		});
 
 
