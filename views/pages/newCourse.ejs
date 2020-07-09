@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <%- include ('../partials/header.ejs') %>
     <link href="stylesheets/login.css" rel="stylesheet" type="text/css">
@@ -7,11 +8,12 @@
 </head>
 
 <body>
-
-    <form id="courseForm" method="POST" action="/newcourse" onsubmit="return validateForm()">
-        <%- include ('../partials/courseForm.ejs') %>
-    </form>
-
+    <div class="container justify-content-center">
+        <form id="courseForm" class="justify-content-around" method="POST" action="/newcourse"
+            onsubmit="return validateForm()">
+            <%- include ('../partials/courseForm.ejs') %>
+        </form>
+    </div>
 
 
 </body>
@@ -28,4 +30,5 @@
         return true;
     }
 </script>
+
 </html>
