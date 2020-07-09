@@ -4,31 +4,38 @@
 
 
 const auth = require('./middleware/auth');
-//const organizer = require('../userTypes/organizer');
+const organizer = require('../userTypes/organizer');
 const users = require('../userTypes/users');
 const courses = require('../userTypes/courses');
 
 module.exports = (app, passport, database) => {
   //login and logout
-  app.get('/login', users.renderLogin);
+  app.get('/login', users.login);
   app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), users.login);
   app.get('/logout', users.logout);
 
-  //testing function
-  app.get('/isLoggedIn', auth.requiresLogin, users.isLoggedIn);
-
-  //Landing page - MANUALLY MERGED
+  //Landing page
   app.get('/main', auth.requiresLogin, users.landing);
 
-  //create new user
+  //create new user of attendee status
   app.get('/newuser', users.signup);
   app.post('/newuser', users.createAccount);
   
 
-  //display landing page
-  //app.get('/landing')
+
+  //organizer-only paths
+  app.get('/organizer/main', auth.requiresOrganizer, organizer.landing);
+  //app.get('/organizer/allusers', auth.requiresOrganizer, organizer.allusers);
+  //add option for change status of members
+
 
   //add additional routes that require authentication to access, else they will be redirected to login
+  //view course details -> need identifier
+  //edit course details -> need identifier
+
+
+
+
 
   //admin section unused for now
 

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <%- include('../partials/header.ejs') %>
+</head>
+
+<body>
+
+  <%- include('../partials/orgNav.ejs') %>
+
+  <div class="container">
+    <div class="row pt-5 pb-2 justify-content-between">
+      <div class="col-6">
+        <h2>Upcoming courses
+          <i class="material-icons">event</i>
+        </h2>
+      </div>
+      <div class="col-5">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Search Courses" aria-label="Search Courses"
+            aria-describedby="basic-addon2">
+          <div class="input-group-append">
+            <button class="btn btn-sm btn-outline-dark justify-content-center" type="button">
+              <i class="material-icons md-24">search</i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Course Name</th>
+            <th scope="col">Topic</th>
+            <th scope="col">Location</th>
+            <th scope="col">Date/Time</th>
+            <th scope="col">Seats</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+            <th scope="col">Organizer Edit Course</th>
+            <th scope="col">Organizer Delete Course</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- sample data -->
+          <tr>
+            <th scope="row">1</th>
+            <td>Leadership Foundations</td>
+            <td>Leadership Training</td>
+            <td>Remote</td>
+            <td>12:30pm, June 1st, 2020</td>
+            <td>30/46</td>
+            <td>Open</td>
+            <td>
+              <i class="material-icons md-24">add_circle_outline</i>
+              <i class="material-icons md-24">star_outline</i>
+            </td>
+            <td>
+              <a href="#"><button type="button" name="edit1Button">Edit Course</button></a>
+            </td>
+            <td>
+              <a href="#"><button type="button" name="delete1Button">Delete Course</button></a>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td>Leadership Advanced</td>
+            <td>Leadership Training</td>
+            <td>Remote</td>
+            <td>12:30pm, June 2nd, 2020</td>
+            <td>40/40 [2]</td>
+            <td>Waitlisted [1]</td>
+            <td>
+              <i class="material-icons md-24">add_circle</i>
+              <i class="material-icons md-24">star</i>
+            </td>
+            <td>
+              <a href="#"><button type="button" name="edit2Button">Edit Course</button></a>
+            </td>
+            <td>
+              <a href="#"><button type="button" name="delete2Button">Delete Course</button></a>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">3</th>
+            <td>Facilitation Techniques</td>
+            <td>Leadership Training</td>
+            <td>Remote</td>
+            <td>4:30pm, June 7th, 2020</td>
+            <td>20/36</td>
+            <td>Enrolled</td>
+            <td>
+              <i class="material-icons md-24">add_circle</i>
+              <i class="material-icons md-24">star</i>
+            </td>
+            <td>
+              <a href="#"><button type="button" name="edit3Button">Edit Course</button></a>
+            </td>
+            <td>
+              <a href="#"><button type="button" name="delete3Button">Delete Course</button></a>
+            </td>
+          </tr>
+          <!-- row template -->
+          <% data.forEach((item, index) => { %>
+          <tr>
+            <th scope="row"><%=index+1 %></th>
+            <td><%= item.title %></td>
+            <td><%= item.topic %></td>
+            <td><%= item.delivery %></td>
+            <td><%= item.time %></td>
+            <td><%= item.seats %>/<%= item.maxSeats %></td>
+            <td><%= item.status %></td>
+            <td>
+              <i class="material-icons md-24">add_circle</i>
+              <i class="material-icons md-24">star</i>
+            </td>
+            <td>
+              <a href="#"><button type="button" name=<%= index + "rowEditButton"%>>Edit Course</button></a>
+            </td>
+            <td>
+              <a href="#"><button type="button" name=<%= index + "rowDeleteButton"%>>Delete Course</button></a>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>
