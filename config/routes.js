@@ -11,8 +11,9 @@ const courses = require('../userTypes/courses');
 module.exports = (app, passport, database) => {
   //login and logout
   app.get('/login', users.login);
-  app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), users.login);
-  app.get('/logout', users.logout);
+  app.post('/login', passport.authenticate('local', { failureRedirect: '/loginfail'}), users.login);
+  app.get('/loginfail', users.loginFail);
+  app.get('/logout', auth.requiresLogin, users.logout);
 
   //Landing page
   app.get('/main', auth.requiresLogin, users.landing);
@@ -20,12 +21,16 @@ module.exports = (app, passport, database) => {
   //create new user of attendee status
   app.get('/newuser', users.signup);
   app.post('/newuser', users.createAccount);
-  
+
 
 
   //organizer-only paths
   app.get('/organizer/main', auth.requiresOrganizer, organizer.landing);
-  //app.get('/organizer/allusers', auth.requiresOrganizer, organizer.allusers);
+  app.get('/organizer/allusers', auth.requiresOrganizer, organizer.allusers);
+  app.post('/organizer/allusers', auth.requiresOrganizer, organizer.updateUsers);
+
+  //course-related paths
+  app.get('/courses/new', auth.requiresOrganizer, courses.renderNewCourse);
   //add option for change status of members
 
 

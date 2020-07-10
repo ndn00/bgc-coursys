@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <%- include('../partials/header.ejs') %>
+  </head>
+  <body>
+    <script type="text/javascript">
+      //wait 4 seconds, then redirect
+      setTimeout( () => {
+        window.location.href = '<%= redirect %>';
+      }, 4000);
+    </script>
+    <div class="container">
+      <p><%= message %> You will be redirected to <%= target %>.</p>
+    </div>
+  </body>
+</html>

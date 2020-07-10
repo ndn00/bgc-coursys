@@ -21,26 +21,53 @@ module.exports = {
       } else if (request.user.type === 'organizer') {
         return result.redirect('/organizer/main');
       }
-    }
-    result.render('pages/login');
+    }    
+    return result.render('pages/login', {errors: []});
 	},
 
-  //NOTE: dummy data (will code database storage later)
-  landing: (request, result) => {
-    var data = [
-        {
-            title: "CMPT276", topic: "Computer Science",
-            delivery: "Remote", time: "5:30pm, July 8th, 2020",
-            seats: 86, maxSeats: 100, status: "Enrolled",
-        },
-        {
-            title: "CMPT276", topic: "Computer Science",
-            delivery: "Remote", time: "5:30pm, July 8th, 2020",
-            seats: 86, maxSeats: 100, status: "Enrolled",
-        },
+  loginFail: (request, result) => {
+    return result.render('pages/login', {errors: ["Authentication error (incorrect email or password)."]});
+  },
 
-    ];
-    result.render('pages/index', { data: data });
+  //NOTE: dummy data (will code database storage later)
+  landing: async (request, result) => {
+    let queryCourse = `
+    SELECT id, course_name, topic, location,start_date,end_date,
+            seat_capacity
+    FROM courses
+    WHERE start_date >= CURRENT_DATE;
+    `;
+
+    try {
+      var data = [];
+
+      database.query(queryCourse, (errOutDB, dbRes) => {
+        if (errOutDB) {
+          result.send("Error querying db on landing/main");
+        } else {
+          var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
+          for (var row=0; row < dbRes.rows.length; row++) {
+            let startDate = new Date(dbRes.rows[row].start_date);
+            data.push(
+              {
+                  title: dbRes.rows[row].course_name,
+                  topic: dbRes.rows[row].topic,
+                  delivery: dbRes.rows[row].location,
+                  time: startDate.toLocaleString("en-US", dateFormat),
+                  seats: '?',
+                  maxSeats: dbRes.rows[row].seat_capacity,
+                  status: "N/A"
+              }
+            );
+          }
+          console.log(data);
+          result.render('pages/index', { data: data });
+        }
+      });
+    } catch (err) {
+      result.send("Error");
+    }
+
   },
 
   logout: (request, result, next) => {
@@ -49,13 +76,13 @@ module.exports = {
         return next(err);
       }
       request.logout();
-      result.sendStatus(200);
+      result.render('pages/redirect', { redirect: '/login', message: 'Logged out successfully!', target: 'the login page'});
     });
   },
 
   //render signup page
   signup: (request, result) => {
-    result.render('pages/signUp');
+    result.render('pages/signUp', { errors: []});
   },
 
   //create new account from email + password
@@ -76,11 +103,16 @@ module.exports = {
     let lowercase = request.body.pwd.match(lowercaseRegex);
     let number = request.body.pwd.match(numberRegex);
 
+    let errors = [];
+
     if (email === null) {
-      return result.json("Invalid email, try again.");
+      errors.push("Invalid email (must have domain bgcengineering.ca)");
     }
     if (password === null || uppercase === null || lowercase === null || number === null) {
-      return result.json("Invalid password, try again.");
+      errors.push("Invalid password, try again.");
+    }
+    if (errors.length > 0) {
+      return result.render('pages/signUp', {errors: errors});
     }
     //check to see if user is already in database
     database.query('SELECT email FROM users WHERE email=$1;', email, (errOutDB, dbRes) => {
@@ -88,7 +120,7 @@ module.exports = {
         return result.json("Database error - looking up existing email");
       }
       if (dbRes.rows.length > 0) {
-        return result.json("Email already exists in database");
+        return result.render("pages/redirect", { redirect: '/login', message: 'The email you provided already exists. Try logging in with it instead.', target: 'the login page'});
       }
       else {
         //create new password
@@ -101,7 +133,7 @@ module.exports = {
             if (errInDB) {
               return result.json("Database error - could not insert");
             }
-            return result.json("Successfully inserted");
+            return result.render("pages/redirect", { redirect: '/login', message: 'New account created successfully!', target: 'the login page'});
           });
         });
       }
