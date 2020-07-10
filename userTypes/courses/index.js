@@ -23,8 +23,8 @@ module.exports = {
     database.query(insertQuery, (errOutDB, dbRes) => {
       if (errOutDB) {
         return result.json("Database error - inserting course");
-      } else {        
-        res.redirect('/main');
+      } else {
+        res.redirect('/organizer/main');
       }
     });
   }

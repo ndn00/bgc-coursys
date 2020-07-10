@@ -12,8 +12,8 @@
   <div class="container">
     <div class="row pt-5 pb-2 justify-content-between">
       <div class="col-6">
-        <h2>Upcoming courses
-          <i class="material-icons">event</i>
+        <h2>Manage Courses
+          <a class="btn p-0" href="/newcourse"><i class="material-icons md-36">add_circle</i></a>
         </h2>
       </div>
       <div class="col-5">
@@ -29,7 +29,7 @@
       </div>
     </div>
     <div class="row justify-content-center">
-      <table class="table table-striped">
+      <table id="tb" class="table table-striped">
         <thead>
           <tr>
             <th scope="col">#</th>
@@ -38,59 +38,10 @@
             <th scope="col">Location</th>
             <th scope="col">Date/Time</th>
             <th scope="col">Seats</th>
-            <th scope="col">Status</th>
-            <th scope="col">Actions</th>
-
+            <th scope="col">Details</th>
           </tr>
         </thead>
         <tbody>
-          <!-- sample data -->
-          <tr>
-            <th scope="row">1</th>
-            <td>Leadership Foundations</td>
-            <td>Leadership Training</td>
-            <td>Remote</td>
-            <td>12:30pm, June 1st, 2020</td>
-            <td>30/46</td>
-            <td>Open</td>
-            <td>
-              <i class="material-icons md-24">add_circle_outline</i>
-              <i class="material-icons md-24">star_outline</i>
-              <a href="#"><i class="material-icons md-24">edit</i></a>
-              <a href="#"><i class="material-icons md-24">delete</i></a>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>Leadership Advanced</td>
-            <td>Leadership Training</td>
-            <td>Remote</td>
-            <td>12:30pm, June 2nd, 2020</td>
-            <td>40/40 [2]</td>
-            <td>Waitlisted [1]</td>
-            <td>
-              <i class="material-icons md-24">add_circle</i>
-              <i class="material-icons md-24">star</i>
-              <a href="#"><i class="material-icons md-24">edit</i></a>
-              <a href="#"><i class="material-icons md-24">delete</i></a>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td>Facilitation Techniques</td>
-            <td>Leadership Training</td>
-            <td>Remote</td>
-            <td>4:30pm, June 7th, 2020</td>
-            <td>20/36</td>
-            <td>Enrolled</td>
-            <td>
-              <i class="material-icons md-24">add_circle</i>
-              <i class="material-icons md-24">star</i>
-              <a href="#"><i class="material-icons md-24">edit</i></a>
-              <a href="#"><i class="material-icons md-24">delete</i></a>
-            </td>
-          </tr>
-          <!-- row template -->
           <% data.forEach((item, index) => { %>
           <tr>
             <th scope="row"><%=index+1 %></th>
@@ -98,14 +49,9 @@
             <td><%= item.topic %></td>
             <td><%= item.delivery %></td>
             <td><%= item.time %></td>
-            <td><%= item.seats %>/<%= item.maxSeats %></td>
+            <!-- <td><%= item.seats %>/<%= item.maxSeats %></td> current seats not available yet-->
+            <td><%= item.maxSeats %></td>
             <td><%= item.status %></td>
-            <td>
-              <i class="material-icons md-24">add_circle</i>
-              <i class="material-icons md-24">star</i>
-              <a href="#"><i class="material-icons md-24">edit</i></a>
-              <a href="#"><i class="material-icons md-24">delete</i></a>
-            </td>
           </tr>
           <% }); %>
         </tbody>
@@ -117,6 +63,14 @@
       </form>
     </div>
   </div>
+  <script>
+    window.onload = () => {
+      $('#tb').SetEditable({
+        // TODO: Add event handlers
+      });
+      console.log("hi");
+    }
+  </script>
 </body>
 
 </html>
