@@ -18,17 +18,17 @@ module.exports = (passport, database) => {
       }
       if (dbres.rows.length > 0) {
         const resultRow = dbres.rows[0];
-        console.log(resultRow);
+        //console.log(resultRow);
         //check to see whether user-entered password matches stored (hashed) password
         bcrypt.compare(password, resultRow.password, function(err, hashres) {
           if (hashres) {
             callback(null, { id: resultRow.id, email: resultRow.email, type: resultRow.type});
           } else {
-            callback(null, false);
+            callback(null, false, { message: "Authentication error: incorrect email or password." });
           }
         })
       } else {
-        callback(null, false);
+        callback(null, false, { message: "Authentication error: incorrect email or password." });
       }
     });
   }));

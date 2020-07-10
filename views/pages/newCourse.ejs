@@ -1,19 +1,37 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <%- include ('../partials/header.ejs') %>
-    <link href="stylesheets/login.css" rel="stylesheet" type="text/css">
 
 </head>
 
 <body>
 
-    <form id="courseCreate" method="POST" action="/newcourse">
-        <%- include('../partials/courseForm.ejs') %>
-    </form>
-    
+
+  <%- include ('../partials/orgNav.ejs') %>
+
+    <div class="container justify-content-center">
+        <form id="courseForm" class="justify-content-around" method="POST" action="/courses/new"
+            onsubmit="return validateForm()">
+            <%- include ('../partials/courseForm.ejs') %>
+        </form>
+    </div>
 
 
 
 </body>
+<script>
+    function validateForm() {
+        let form = document.forms["courseForm"];
+        let startDateTime = new Date(form["startdate"].value + ' ' + form["starttime"].value);
+        let endDateTime = new Date(form["enddate"].value + ' ' + form["endtime"].value);
+        if (startDateTime > endDateTime) {
+            alert("End time of course must be after the start");
+            return false;
+        }
+        return true;
+    }
+</script>
+
 </html>

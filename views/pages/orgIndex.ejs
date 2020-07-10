@@ -7,13 +7,13 @@
 
 <body>
 
-  <%- include('../partials/nav.ejs') %>
+  <%- include('../partials/orgNav.ejs') %>
 
   <div class="container">
     <div class="row pt-5 pb-2 justify-content-between">
       <div class="col-6">
-        <h2>Upcoming courses
-          <i class="material-icons">event</i>
+        <h2>Manage Courses
+          <a class="btn p-0" href="/courses/new"><i class="material-icons md-36">add_circle</i></a>
         </h2>
       </div>
       <div class="col-5">
@@ -29,7 +29,7 @@
       </div>
     </div>
     <div class="row justify-content-center">
-      <table class="table table-striped">
+      <table id="tb" class="table table-striped">
         <thead>
           <tr>
             <th scope="col">#</th>
@@ -38,12 +38,10 @@
             <th scope="col">Location</th>
             <th scope="col">Date/Time</th>
             <th scope="col">Seats</th>
-            <th scope="col">Status</th>
-            <th scope="col">Actions</th>
+            <th scope="col">Details</th>
           </tr>
         </thead>
         <tbody>
-          <!-- row template -->
           <% data.forEach((item, index) => { %>
           <tr>
             <th scope="row"><%=index+1 %></th>
@@ -51,19 +49,23 @@
             <td><%= item.topic %></td>
             <td><%= item.delivery %></td>
             <td><%= item.time %></td>
-            <!-- <td><%= item.seats %>/<%= item.maxSeats %></td>  SEATS NOT AVAILABLE YET-->
+            <!-- <td><%= item.seats %>/<%= item.maxSeats %></td> current seats not available yet-->
             <td><%= item.maxSeats %></td>
             <td><%= item.status %></td>
-            <td>
-              <i class="material-icons md-24">add_circle</i>
-              <i class="material-icons md-24">star</i>
-            </td>
           </tr>
           <% }); %>
         </tbody>
       </table>
     </div>
   </div>
+  <script>
+    window.onload = () => {
+      $('#tb').SetEditable({
+        // TODO: Add event handlers
+      });
+      console.log("hi");
+    }
+  </script>
 </body>
 
 </html>

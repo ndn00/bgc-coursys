@@ -8,10 +8,10 @@ module.exports = {
     if (request.user) {
       return next();
     }
-    result.sendStatus(401);
+    result.redirect('/login');
   },
   requiresOrganizer: (request, result, next) => {
-    if (request.user && req.user.type === 'organizer') {
+    if (request.user && request.user.type === 'organizer') {
       return next();
     }
     result.sendStatus(401);

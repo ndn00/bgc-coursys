@@ -1,0 +1,22 @@
+NOTE - test.js is IN PROGRESS
+
+Login
+- When both email and password fields are left blank and submitted, an empty login page is displayed => Pass
+- An email is only valid if it contains at least one legal character before and after the @ symbol (enforced by HTML5) => Pass
+- When the password field is left blank and submitted, an empty login page is displayed => Pass
+- When the email field is incorrect and submitted, an empty login page is displayed => Pass
+- When the password field is incorrect and submitted, an empty login page is displayed => Pass
+- When the email and password of an organizer is submitted, the organizer landing page ('/organizer/main') is displayed => Pass
+- When the email and password of an attendee is submitted, the attendee landing page ('/main') is displayed => Pass
+- If a user has previously logged in and attempts to access the login page again, they will be redirected to their respective landing page => Pass
+- If a user has logged out and tries to access the login page, they will see the login page => Pass
+
+Logout
+- A user should not be able to access the logout page unless they are already logged in => In Progress
+- Upon logging out, a user should receive the HTTP status code 200 (OK) => Pass
+
+Signup
+- If a user does not enter a valid BGC email (valid head + @bgcengineering.ca), they will be alerted => Pass
+- If a user does not enter a valid password, they will be alerted => Pass
+- The form will only submit when there is a valid email and password => Pass
+- When a user signs up successfully, they will be alerted => In Progress
