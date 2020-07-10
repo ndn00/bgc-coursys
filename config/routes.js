@@ -28,7 +28,9 @@ module.exports = (app, passport, database) => {
   app.get('/organizer/main', auth.requiresOrganizer, organizer.landing);
   app.get('/organizer/allusers', auth.requiresOrganizer, organizer.allusers);
   app.post('/organizer/allusers', auth.requiresOrganizer, organizer.updateUsers);
-  app.get('/organizer/courses/new', auth.requiresOrganizer, organizer.newCourse);
+
+  //course-related paths
+  app.get('/courses/new', auth.requiresOrganizer, courses.renderNewCourse);
   //add option for change status of members
 
 

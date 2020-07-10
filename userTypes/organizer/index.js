@@ -2,9 +2,6 @@
 //handles organizer-only functions
 const database = require('../../database');
 
-
-const database = require("../../database");
-
 module.exports = {
 
 	//add organizer-only functions here
@@ -17,7 +14,7 @@ module.exports = {
         FROM courses
         WHERE start_date >= CURRENT_DATE;
         `;
-        
+
         try {
             var data = [];
 
@@ -43,7 +40,7 @@ module.exports = {
                     console.log(data);
                     result.render('pages/orgIndex', { data: data });
                 }
-            });            
+            });
         } catch (err) {
             result.send("Error");
         }

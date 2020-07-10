@@ -3,17 +3,16 @@
 
 <head>
     <%- include ('../partials/header.ejs') %>
-    <link href="stylesheets/login.css" rel="stylesheet" type="text/css">
 
 </head>
 
 <body>
 
 
-  <%- (include '../partials/orgNav.ejs') %>
+  <%- include ('../partials/orgNav.ejs') %>
 
     <div class="container justify-content-center">
-        <form id="courseForm" class="justify-content-around" method="POST" action="/newcourse"
+        <form id="courseForm" class="justify-content-around" method="POST" action="/courses/new"
             onsubmit="return validateForm()">
             <%- include ('../partials/courseForm.ejs') %>
         </form>
@@ -31,7 +30,6 @@
             alert("End time of course must be after the start");
             return false;
         }
-
         return true;
     }
 </script>

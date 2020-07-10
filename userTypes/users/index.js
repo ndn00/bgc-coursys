@@ -16,8 +16,12 @@ module.exports = {
   //otherwise, render login page
   login: (request, result) => {
     if (request.user) {
-      return result.redirect('/main');
-    }
+      if (request.user.type === 'attendee') {
+        return result.redirect('/main');
+      } else if (request.user.type === 'organizer') {
+        return result.redirect('/organizer/main');
+      }
+    }    
     return result.render('pages/login', {errors: []});
 	},
 
@@ -33,7 +37,7 @@ module.exports = {
     FROM courses
     WHERE start_date >= CURRENT_DATE;
     `;
-    
+
     try {
       var data = [];
 
@@ -63,7 +67,7 @@ module.exports = {
     } catch (err) {
       result.send("Error");
     }
-    
+
   },
 
   logout: (request, result, next) => {
