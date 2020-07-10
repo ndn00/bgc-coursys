@@ -42,35 +42,6 @@
           </tr>
         </thead>
         <tbody>
-          <!-- sample data -->
-          <tr>
-            <th scope="row">1</th>
-            <td>Leadership Foundations</td>
-            <td>Leadership Training</td>
-            <td>Remote</td>
-            <td>12:30pm, June 1st, 2020</td>
-            <td>30/46</td>
-            <td>Open</td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>Leadership Advanced</td>
-            <td>Leadership Training</td>
-            <td>Remote</td>
-            <td>12:30pm, June 2nd, 2020</td>
-            <td>40/40 [2]</td>
-            <td>Waitlisted [1]</td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td>Facilitation Techniques</td>
-            <td>Leadership Training</td>
-            <td>Remote</td>
-            <td>4:30pm, June 7th, 2020</td>
-            <td>20/36</td>
-            <td>Enrolled</td>
-          </tr>
-          <!-- row template -->
           <% data.forEach((item, index) => { %>
           <tr>
             <th scope="row"><%=index+1 %></th>
@@ -78,7 +49,8 @@
             <td><%= item.topic %></td>
             <td><%= item.delivery %></td>
             <td><%= item.time %></td>
-            <td><%= item.seats %>/<%= item.maxSeats %></td>
+            <!-- <td><%= item.seats %>/<%= item.maxSeats %></td> current seats not available yet-->
+            <td><%= item.maxSeats %></td>
             <td><%= item.status %></td>
           </tr>
           <% }); %>
