@@ -8,6 +8,8 @@
 
 <body>
 
+  <%- (include '../partials/orgNav.ejs') %>
+
     <form id="courseForm" method="POST" action="/osrganizer/courses/new" onsubmit="return validateForm()">
         <%- include ('../partials/courseForm.ejs') %>
     </form>

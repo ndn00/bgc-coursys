@@ -58,7 +58,7 @@ module.exports = {
 
   //render signup page
   signup: (request, result) => {
-    result.render('pages/signUp');
+    result.render('pages/signUp', { errors: []});
   },
 
   //create new account from email + password
@@ -79,11 +79,16 @@ module.exports = {
     let lowercase = request.body.pwd.match(lowercaseRegex);
     let number = request.body.pwd.match(numberRegex);
 
+    let errors = [];
+
     if (email === null) {
-      return result.json("Invalid email, try again.");
+      errors.push("Invalid email (must have domain bgcengineering.ca)");
     }
     if (password === null || uppercase === null || lowercase === null || number === null) {
-      return result.json("Invalid password, try again.");
+      errors.push("Invalid password, try again.");
+    }
+    if (errors.length > 0) {
+      return result.render('pages/signUp', {errors: errors});
     }
     //check to see if user is already in database
     database.query('SELECT email FROM users WHERE email=$1;', email, (errOutDB, dbRes) => {
@@ -91,7 +96,7 @@ module.exports = {
         return result.json("Database error - looking up existing email");
       }
       if (dbRes.rows.length > 0) {
-        return result.json("Email already exists in database");
+        return result.render("pages/redirect", { redirect: '/login', message: 'The email you provided already exists. Try logging in with it instead.', target: 'the login page'});
       }
       else {
         //create new password
