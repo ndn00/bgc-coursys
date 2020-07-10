@@ -52,13 +52,31 @@ describe('login-interactions', function() {
     await driver.findElement(By.id('loginSubmit')).click();
     const failEmailField = await driver.findElement(By.name('uname')).getAttribute('value');
     const failPassField = await driver.findElement(By.name('pwd')).getAttribute('value');
+    const errorMessage = await driver.findElement(By.css("p")).getText();
+    const curURL = await driver.getCurrentUrl();
 
-
+    expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/loginfail');
     expect(failEmailField).to.equal('');
     expect(failPassField).to.equal('');
+    expect(errorMessage).to.equal('Authentication error (incorrect email or password).');
 
   });
-  it('should return the authentication error page with empty email and something in password field');
+  it('should return the authentication error page with empty email and something in password field', async function() {
+    await driver.get(loginURL);
+    await driver.sleep(2000);
+    await driver.findElement(By.name('pwd')).sendKeys('v3ryStr0ngPa55');
+    await driver.findElement(By.id('loginSubmit')).click();
+    const failEmailField = await driver.findElement(By.name('uname')).getAttribute('value');
+    const failPassField = await driver.findElement(By.name('pwd')).getAttribute('value');
+    const errorMessage = await driver.findElement(By.css("p")).getText();
+    const curURL = await driver.getCurrentUrl();
+
+    expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/loginfail');
+    expect(failEmailField).to.equal('');
+    expect(failPassField).to.equal('');
+    expect(errorMessage).to.equal('Authentication error (incorrect email or password).');
+  });
+  
 
   after(async () => driver.quit());
 
