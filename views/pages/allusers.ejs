@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <%- include('../partials/header.ejs') %>
+  </head>
+  <body>
+    <style type="text/css">
+      .borderlessInput {
+        background-color: transparent;
+        border: transparent;
+      }
+
+    </style>
+    <%- include('../partials/orgNav.ejs') %>
+
+    <div class="container">
+      <h2>Modify User Status</h2>
+      <form id="modifyUser" action="/organizer/allusers" method="post">
+        <input type="number" name="tableSize" value="<%= userData.length %>" hidden>
+
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope='col'>ID</th>
+              <th scope='col'>Email</th>
+              <th scope='col'>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+          <% userData.forEach((user) => { %>
+            <% if (user.email !== curUser) {%>
+            <tr>
+              <th scope='row'>
+                <input type="number" class="borderlessInput" size="4" name=<%= "id" + user.id %> value=<%= user.id %> readonly>
+              </th>
+              <td>
+                <!-- leave email read-only for now -->
+                <input type="email" class="borderlessInput" size="50" name=<%= "email" + user.id %> value=<%= user.email %> readonly>
+              </td>
+              <td>
+                <% if (user.type === 'organizer') {%>
+                <div>
+                  <input type="radio" name=<%= "status" + user.id %> value="organizer" checked>
+                  <label for="organizer">Organizer</label>
+                </div>
+                <div>
+                  <input type="radio" name=<%= "status" + user.id %>  value="attendee">
+                  <label for="attendee">Attendee</label>
+                </div>
+                <% } else { %>
+                  <div>
+                    <input type="radio" name=<%= "status" + user.id %> value="organizer">
+                    <label for="organizer">Organizer</label>
+                  </div>
+                  <div>
+                    <input type="radio" name=<%= "status" + user.id %>  value="attendee" checked>
+                    <label for="attendee">Attendee</label>
+                  </div>
+                <% } %>
+              </td>
+            </tr>
+            <% } %>
+          <% }); %>
+          </tbody>
+        </table>
+
+        <% if (userData.length > 0) { %>
+          <input type="submit" class="btn btn-dark" name="updateUserData" value="Update User Data">
+        <% } else { %>
+          <p>Database contains no other users so cannot update.</p>
+        <% } %>
+
+
+      </form>
+    </div>
+
+  </body>
+</html>

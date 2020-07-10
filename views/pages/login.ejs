@@ -13,8 +13,19 @@
       <div class="col-8 col-sm-6 text-center">
         <h1>BGC Coursys Login</h1>
         <div class="mt-4">
+
+
           <form id="loginForm" method="POST" action="/login">
             <div class="input-group justify-content-center flex-column">
+              <% if (errors.length > 0) { %>
+                <div>
+
+                  <% errors.forEach((errorItem) => { %>
+                    <p><%= errorItem %></p>
+                  <% }); %>
+
+                </div>
+              <% } %>
               <div>
                 <input type="email" class="form-control mb-2" name="uname" placeholder="Email" />
               </div>

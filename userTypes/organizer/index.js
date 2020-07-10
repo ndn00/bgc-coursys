@@ -1,5 +1,7 @@
 //index.js
 //handles organizer-only functions
+const database = require('../../database');
+
 
 const database = require("../../database");
 
@@ -47,8 +49,33 @@ module.exports = {
         }
   },
 	//as of now, organizer accounts must be manually created
+	allusers: (request, result) => {
+		//access database
+		database.query('SELECT id, email, type FROM users;', (err, dbRes) => {
+			if (err) {
+				return result.json("Could not retrieve database values to show all users");
+			}
+			//pass in data to render
+			return result.render('pages/allusers', { userData: dbRes.rows, curUser: request.user.email });
+		});
+	},
 
-	//stub for user access control page
+	updateUsers: (request, result) => {
+		let tableSize = parseInt(request.body.tableSize, 10);
+		for (let i = 1; i <= tableSize; i++) {
+			if (request.body["id" + i]) {
+				console.log("Ok" + i);
+				//update database, set type to organizer for users
+
+				//update database, set type to attendee for users
+			}
+		}
+		result.render('pages/redirect', { redirect: '/organizer/main', message: 'User data has been successfully updated!', target: 'the main courses page'});
+	},
+
+	newCourse: (request, result) => {
+		result.render('pages/newCourse');
+	}
 
 
 }

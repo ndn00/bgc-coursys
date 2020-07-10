@@ -18,4 +18,4 @@ require('./config/express')(app, passport, db.pool);
 require('./config/routes')(app, passport, db);
 
 
-app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
+module.exports = app.listen(PORT, () => console.log(`Listening on ${ PORT }`));

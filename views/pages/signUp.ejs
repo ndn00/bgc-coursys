@@ -14,6 +14,14 @@
         <div class="mt-5">
           <form id="signupForm" method="POST" action="/newuser" onsubmit="return validate()">
             <div class="input-group justify-content-center flex-column">
+              <% if (errors.length > 0) { %>
+                <div>
+                  <% errors.forEach((errorItem) => { %>
+                    <p><%= errorItem %></p>
+                  <% }); %>
+                </div>
+              <% } %>
+
               <div class="mb-2">
                 <input type="email" class="form-control" name="uname" placeholder="Email" />
                 <small id="email-check" class=" form-text text-left d-none text-danger">

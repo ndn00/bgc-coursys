@@ -8,12 +8,17 @@
 </head>
 
 <body>
+
+
+  <%- (include '../partials/orgNav.ejs') %>
+
     <div class="container justify-content-center">
         <form id="courseForm" class="justify-content-around" method="POST" action="/newcourse"
             onsubmit="return validateForm()">
             <%- include ('../partials/courseForm.ejs') %>
         </form>
     </div>
+
 
 
 </body>
