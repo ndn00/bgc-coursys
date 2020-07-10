@@ -31,6 +31,7 @@ module.exports = (app, passport, database) => {
 
   //course-related paths
   app.get('/courses/new', auth.requiresOrganizer, courses.renderNewCourse);
+  app.post('/courses/new', auth.requiresOrganizer, courses.submitNewCourse);
   //add option for change status of members
 
 
