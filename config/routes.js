@@ -11,7 +11,8 @@ const courses = require('../userTypes/courses');
 module.exports = (app, passport, database) => {
   //login and logout
   app.get('/login', users.login);
-  app.post('/login', passport.authenticate('local', { failureRedirect: '/login'}), users.login);
+  app.post('/login', passport.authenticate('local', { failureRedirect: '/loginfail'}), users.login);
+  app.get('/loginfail', users.loginFail);
   app.get('/logout', auth.requiresLogin, users.logout);
 
   //Landing page

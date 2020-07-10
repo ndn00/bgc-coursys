@@ -16,18 +16,20 @@ module.exports = {
   //otherwise, render login page
   login: (request, result) => {
     if (request.user) {
-      if (request.user.type === 'attendee') {
-        return result.redirect('/main');
-      } else if (request.user.type === 'organizer') {
-        return result.redirect('/organizer/main');
-      }
+      return result.redirect('/main');
     }
-    //console.log(result);
-    result.render('pages/login');
+    return result.render('pages/login', {errors: []});
 	},
+
+  loginFail: (request, result) => {
+    return result.render('pages/login', {errors: ["Authentication error (incorrect email or password)."]});
+  },
 
   //NOTE: dummy data (will code database storage later)
   landing: (request, result) => {
+    if (request.user.type === 'organizer') {
+      return result.redirect('/organizer/main');
+    }
     var data = [
         {
             title: "CMPT276", topic: "Computer Science",
