@@ -30,6 +30,7 @@
           <tbody>
           <% userData.forEach((user) => { %>
             <% if (user.email !== curUser) {%>
+            <!--Cannot change status of current user to prevent changing authentication rules mid-session -->
             <tr>
               <th scope='row'>
                 <input type="number" class="borderlessInput" size="4" name=<%= "id" + user.id %> value=<%= user.id %> readonly>
@@ -39,6 +40,7 @@
                 <input type="email" class="borderlessInput" size="50" name=<%= "email" + user.id %> value=<%= user.email %> readonly>
               </td>
               <td>
+                <!-- Based on the user status, have a different radio button checked by default-->
                 <% if (user.type === 'organizer') {%>
                 <div>
                   <input type="radio" name=<%= "status" + user.id %> value="organizer" checked>
@@ -68,7 +70,7 @@
         <% if (userData.length > 0) { %>
           <input type="submit" class="btn btn-dark" name="updateUserData" value="Update User Data">
         <% } else { %>
-          <p>Database contains no other users so cannot update.</p>
+          <p>Database contains no other users so cannot update. <a href="/organizer/main">Go back to the main page.</a></p>
         <% } %>
 
 

@@ -58,15 +58,54 @@ module.exports = {
 	},
 
 	updateUsers: (request, result) => {
+		//updates all users whose status has changed
 		let tableSize = parseInt(request.body.tableSize, 10);
+		let newAttendees = [];
+		let attendeeParams = [];
+		let newOrganizers = [];
+		let organizerParams = [];
+
+
 		for (let i = 1; i <= tableSize; i++) {
 			if (request.body["id" + i]) {
-				console.log("Ok" + i);
+				if (request.body["status" + i] === 'attendee') {
+					newAttendees.push(i);
+				}
+				else {
+					newOrganizers.push(i);
+				}
 				//update database, set type to organizer for users
-
 				//update database, set type to attendee for users
 			}
+
 		}
+		for (let j = 1; j <= newAttendees.length; j++) {
+			attendeeParams.push('$' + j);
+		}
+		for (let k = 1; k <= newOrganizers.length; k++) {
+			organizerParams.push('$' + k);
+		}
+		let newAttendeeQuery = "UPDATE users SET type='attendee' WHERE id IN (" + attendeeParams.join(',') + ");"
+		let newOrganizerQuery = "UPDATE users SET type='organizer' WHERE id IN (" + organizerParams.join(',') + ");"
+		console.log(newAttendees);
+		console.log(newAttendeeQuery);
+		console.log(newOrganizers);
+		console.log(newOrganizerQuery);
+		if (newAttendees.length > 0) {
+			database.query(newAttendeeQuery, newAttendees, (dbErr, dbRes) => {
+				if (dbErr) {
+					return result.send("Database error - could not update new attendees");
+				}
+			});
+		}
+		if (newOrganizers.length > 0) {
+			database.query(newOrganizerQuery, newOrganizers, (dbErr, dbRes) => {
+				if (dbErr) {
+					return result.send("Database error - could not update new organizers");
+				}
+			});
+		}
+
 		result.render('pages/redirect', { redirect: '/organizer/main', message: 'User data has been successfully updated!', target: 'the main courses page'});
 	},
 
