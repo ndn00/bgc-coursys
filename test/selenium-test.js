@@ -116,6 +116,22 @@ describe('login-interactions', function() {
     expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/main');
     await driver.get(logoutURL);
   });
+  it('should return the redirect page when logging out', async function() {
+    await driver.get(loginURL);
+    await driver.sleep(2000);
+    await driver.findElement(By.name('uname')).sendKeys('test-attendee@bgcengineering.ca');
+    await driver.findElement(By.name('pwd')).sendKeys('11111111aA');
+    await driver.findElement(By.id('loginSubmit')).click();
+    const curURL = await driver.getCurrentUrl();
+
+    expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/main');
+    await driver.findElement(By.id('logoutButton')).click();
+
+    const logoutTestURL = await driver.getCurrentUrl();
+    expect(logoutTestURL).to.equal(logoutURL);
+
+  });
+  it('should return the login page after (currently 4000) ms on the redirect page');
 
 
   after(async () => driver.quit());
