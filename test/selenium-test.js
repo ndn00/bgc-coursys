@@ -125,6 +125,7 @@ describe('login-interactions', function() {
     const curURL = await driver.getCurrentUrl();
 
     expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/main');
+    await driver.sleep(1000);
     await driver.findElement(By.id('logoutButton')).click();
 
     const logoutTestURL = await driver.getCurrentUrl();
