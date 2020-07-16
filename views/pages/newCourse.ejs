@@ -22,7 +22,18 @@
 
 </body>
 <script>
+    //handy materials
+    let numSessions = 1;
+    let sessionDiv = document.getElementById('session1').cloneNode(true);
+    console.log(sessionDiv);
+    let newButton = document.getElementById('addSession');
+    let removeButton = document.getElementById('removeSession');
+    let outerSession = document.getElementById('outerSession');
+
     function validateForm() {
+        //check that sessions do not overlap
+        //check that sessions
+
         let form = document.forms["courseForm"];
         let startDateTime = new Date(form["startdate"].value + ' ' + form["starttime"].value);
         let endDateTime = new Date(form["enddate"].value + ' ' + form["endtime"].value);
@@ -32,6 +43,44 @@
         }
         return true;
     }
+    //create new session
+    function newSession() {
+      //currently blank session is cloned
+      //TODO: keep times, auto date interval?
+      let newNode = sessionDiv.cloneNode(true);
+      numSessions++;
+      newNode.setAttribute('id', ('session' + numSessions));
+      console.log(newNode);
+      //change date attribute
+      newNode.firstElementChild.firstElementChild.lastElementChild.setAttribute('id', ('sessionDate' + numSessions));
+      newNode.firstElementChild.firstElementChild.lastElementChild.setAttribute('name', ('sessionDate' + numSessions));
+
+      //change start time
+      newNode.lastElementChild.firstElementChild.lastElementChild.setAttribute('id', ('startTime' + numSessions));
+      newNode.lastElementChild.firstElementChild.lastElementChild.setAttribute('name', ('startTime' + numSessions));
+
+      //change end time
+      newNode.lastElementChild.lastElementChild.lastElementChild.setAttribute('id', ('endTime' + numSessions));
+      newNode.lastElementChild.lastElementChild.lastElementChild.setAttribute('name', ('endTime' + numSessions));
+      outerSession.appendChild(newNode);
+      removeButton.removeAttribute('hidden');
+
+    }
+
+    //remove session
+    function removeSession() {
+      let targetDiv = document.getElementById('session' + numSessions);
+      targetDiv.remove();
+      numSessions--;
+      if (numSessions < 2) {
+        removeButton.setAttribute('hidden', '');
+      }
+    }
+
+    //event listeners
+    newButton.addEventListener('click', newSession);
+
+    removeButton.addEventListener('click', removeSession);
 </script>
 
 </html>

@@ -17,13 +17,23 @@ module.exports = {
       INSERT INTO courses(course_name, topic, location, start_date, end_date, seat_capacity, description)
       VALUES ('${req.body.coursename}', '${req.body.topic}', '${req.body.location}',
         '${req.body.startdate + ' ' + req.body.starttime}', '${req.body.enddate + ' ' + req.body.endtime}',
-        ${req.body.capacity}, '${req.body.description}');
+        ${req.body.capacity}, '${req.body.description}')
+        RETURNING id;
       `;
+    //gather number of sessions
+
+    //use returning from first query to get the ID for the session insert
+
+    //construct query
+
+    //insert number of sessions into new table
     console.log(insertQuery);
     database.query(insertQuery, (errOutDB, dbRes) => {
       if (errOutDB) {
         return result.json("Database error - inserting course");
       } else {
+        
+
         res.redirect('/organizer/main');
       }
     });
