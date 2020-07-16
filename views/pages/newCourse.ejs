@@ -25,21 +25,58 @@
     //handy materials
     let numSessions = 1;
     let sessionDiv = document.getElementById('session1').cloneNode(true);
-    console.log(sessionDiv);
     let newButton = document.getElementById('addSession');
     let removeButton = document.getElementById('removeSession');
     let outerSession = document.getElementById('outerSession');
+    let sessionTracker = document.getElementById('sessionTracker');
+
 
     function validateForm() {
         //check that sessions do not overlap
         //check that sessions
 
-        let form = document.forms["courseForm"];
-        let startDateTime = new Date(form["startdate"].value + ' ' + form["starttime"].value);
-        let endDateTime = new Date(form["enddate"].value + ' ' + form["endtime"].value);
-        if (startDateTime > endDateTime) {
-            alert("End time of course must be after the start");
+        //check that numSessions matches hidden session tracker in form
+        if (document.getElementById('sessionTracker').value != numSessions) {
+          alert("Session tracker de-synced: refresh and try again");
+          return false;
+        }
+
+        //check that capacity is positive
+        if (document.getElementById('capacity').value < 0) {
+          alert("Cannot have negative capacity");
+          return false;
+        }
+
+        let dates = document.getElementsByClassName('date-wrapper');
+        let starts = document.getElementsByClassName('start-wrapper');
+        let ends = document.getElementsByClassName('end-wrapper');
+        if (dates.length !== starts.length || dates.length !== ends.length || ends.length !== starts.length) {
+          return false;
+        }
+        let previousStart = new Date(0);
+        let previousEnd = new Date();
+        let creationTime = new Date();
+        for (let i = 0; i < dates.length; i++) {
+          let startDateTime = new Date(dates[i].lastElementChild.value + ' ' + starts[i].lastElementChild.value);
+          let endDateTime = new Date(dates[i].lastElementChild.value + ' ' + ends[i].lastElementChild.value);
+          if (previousStart > startDateTime) {
+            alert("Sessions should be scheduled in chronological order");
             return false;
+          }
+          if (creationTime > startDateTime) {
+            alert("Cannot schedule courses in the past, unless you have magical time travel");
+            return false;
+          }
+          if (previousEnd > startDateTime) {
+            alert("Sessions should not overlap (previous session must end before next session starts)");
+            return false;
+          }
+          if (startDateTime > endDateTime) {
+              alert("End time of course must be after the start");
+              return false;
+          }
+          previousStart = startDateTime;
+          previousEnd = endDateTime;
         }
         return true;
     }
@@ -50,7 +87,6 @@
       let newNode = sessionDiv.cloneNode(true);
       numSessions++;
       newNode.setAttribute('id', ('session' + numSessions));
-      console.log(newNode);
       //change date attribute
       newNode.firstElementChild.firstElementChild.lastElementChild.setAttribute('id', ('sessionDate' + numSessions));
       newNode.firstElementChild.firstElementChild.lastElementChild.setAttribute('name', ('sessionDate' + numSessions));
@@ -64,6 +100,7 @@
       newNode.lastElementChild.lastElementChild.lastElementChild.setAttribute('name', ('endTime' + numSessions));
       outerSession.appendChild(newNode);
       removeButton.removeAttribute('hidden');
+      sessionTracker.setAttribute('value', numSessions);
 
     }
 
@@ -75,6 +112,7 @@
       if (numSessions < 2) {
         removeButton.setAttribute('hidden', '');
       }
+      sessionTracker.setAttribute('value', numSessions);
     }
 
     //event listeners
