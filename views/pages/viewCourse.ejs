@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <%- include('../partials/header.ejs') %>
+  </head>
+  <body>
+
+    <% if (isOrganizer) { %>
+      <%- include ('../partials/orgNav.ejs') %>
+    <% } else { %>
+      <%- include('../partials/nav.ejs') %>
+    <% } %>
+
+  </body>
+</html>

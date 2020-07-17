@@ -33,7 +33,7 @@ module.exports = (app, passport, database) => {
   app.get('/courses/new', auth.requiresOrganizer, courses.renderNewCourse);
   app.post('/courses/new', auth.requiresOrganizer, courses.submitNewCourse);
   //add option for change status of members
-
+  app.get('/courses/:id', auth.requiresLogin, courses.viewCourse);
 
   //add additional routes that require authentication to access, else they will be redirected to login
   //view course details -> need identifier

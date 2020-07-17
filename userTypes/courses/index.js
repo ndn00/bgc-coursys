@@ -58,6 +58,33 @@ module.exports = {
         });
       }
     });
-  }
+  },
+
+  viewCourse: (req, res) => {
+      let courseID = parseInt(req.params.id, 10);
+      //retrieve name, topic, location, max capacity, current seats, description, session times
+      let getCourse = `
+        SELECT courses.course_name, courses.topic, courses.location, courses.seat_capacity, courses.description, course_sessions.session_start, course_sessions.session_end
+        FROM courses, course_sessions
+        WHERE courses.id = course_sessions.course_id
+        AND courses.id=$1;
+        `;
+
+      database.query(getCourse, [courseID], (dbErr, dbRes) => {
+        if (dbErr) {
+          return res.json("Database error - viewing courses");
+        }
+        if (dbRes.length > 0) {
+          //only 1 query needed
+          //Can be case where there is no course_sessions -> will need to check
+          return res.render();
+        } else {
+          return res.json("Could not retrieve course records");
+        }
+      });
+
+
+
+  },
 
 }
