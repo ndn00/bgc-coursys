@@ -21,7 +21,7 @@ module.exports = {
       } else if (request.user.type === 'organizer') {
         return result.redirect('/organizer/main');
       }
-    }    
+    }
     return result.render('pages/login', {errors: []});
 	},
 
@@ -32,10 +32,10 @@ module.exports = {
   //NOTE: dummy data (will code database storage later)
   landing: async (request, result) => {
     let queryCourse = `
-    SELECT id, course_name, topic, location,start_date,end_date,
+    SELECT id, course_name, topic, location, course_deadline,
             seat_capacity
     FROM courses
-    WHERE start_date >= CURRENT_DATE;
+    WHERE course_deadline >= CURRENT_DATE;
     `;
 
     try {
@@ -47,13 +47,14 @@ module.exports = {
         } else {
           var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
           for (var row=0; row < dbRes.rows.length; row++) {
-            let startDate = new Date(dbRes.rows[row].start_date);
+            let deadlineDate = new Date(dbRes.rows[row].course_deadline);
             data.push(
               {
+                  id: dbRes.rows[row].id,
                   title: dbRes.rows[row].course_name,
                   topic: dbRes.rows[row].topic,
                   delivery: dbRes.rows[row].location,
-                  time: startDate.toLocaleString("en-US", dateFormat),
+                  time: deadlineDate.toLocaleString("en-US", dateFormat),
                   seats: '?',
                   maxSeats: dbRes.rows[row].seat_capacity,
                   status: "N/A"

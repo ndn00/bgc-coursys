@@ -15,17 +15,27 @@ module.exports = {
 
   submitNewCourse: (req, res) => {
     let insertQuery = `
-      INSERT INTO courses (course_name, topic, location, sessions, seat_capacity, description)
-      VALUES ('${req.body.coursename}', '${req.body.topic}', '${req.body.location}',
-        '${req.body.sessionTracker}',
-        ${req.body.capacity}, '${req.body.description}')
-        RETURNING id;
+      INSERT INTO courses (course_name, topic, location, sessions, seat_capacity, course_deadline, description)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id;
       `;
+
+    //verify that deadline time is valid
+    console.log(req.body.deadline + " " + req.body.deadTime);
+
     //use returning from first query to get the ID for the session insert
+    let insertObject = [
+      req.body.coursename,
+      req.body.topic,
+      req.body.location,
+      req.body.sessionTracker,
+      req.body.capacity,
+      (req.body.deadline + ' ' + req.body.deadTime),
+      req.body.description
 
-
+    ];
     //console.log(insertQuery);
-    database.query(insertQuery, (errOutDB, dbRes) => {
+    database.query(insertQuery, insertObject, (errOutDB, dbRes) => {
       if (errOutDB) {
         return result.json("Database error - inserting course");
       } else {
@@ -48,8 +58,6 @@ module.exports = {
 
         }
         insertSessionQuery += ';'
-        console.log(insertSessionQuery);
-        console.log(insertSession);
         database.query(insertSessionQuery, insertSession, (errOutDB1, dbRes1) => {
           if (errOutDB1) {
             return res.json("Database error - inserting course sessions");
@@ -64,7 +72,8 @@ module.exports = {
       let courseID = parseInt(req.params.id, 10);
       //retrieve name, topic, location, max capacity, current seats, description, session times
       let getCourse = `
-        SELECT courses.course_name, courses.topic, courses.location, courses.sessions, courses.seat_capacity, courses.description, course_sessions.session_start, course_sessions.session_end
+        SELECT courses.course_name, courses.topic, courses.location, courses.sessions, courses.seat_capacity,
+        courses.description, course_sessions.session_start, course_sessions.session_end
         FROM courses, course_sessions
         WHERE courses.id = course_sessions.course_id
         AND courses.id=$1;
@@ -111,6 +120,59 @@ module.exports = {
         }
       });
 
+  },
+
+  renderEditCourse: (req, res) => {
+    let courseID = parseInt(req.params.id, 10);
+    let getCourseDetails = `
+    SELECT courses.course_name, courses.topic, courses.location, courses.sessions, courses.seat_capacity,
+    courses.description, courses.course_deadline, course_sessions.session_start, course_sessions.session_end
+    FROM courses, course_sessions
+    WHERE courses.id = course_sessions.course_id
+    AND courses.id=$1;
+    `;
+    //24 hr time format
+    //example: 23:59:00
+    let timeFormat = /(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]/g;
+
+    database.query(getCourseDetails, [courseID], (dbErr, dbRes) => {
+      if (dbErr) {
+        return res.json('Database error - getting course details for editing');
+      }
+      if (dbRes.rows.length > 0) {
+        //need to split items into date, start_time, end_time
+        let formattedDates = dbRes.rows.map((oldRow) => {
+          let startSess = new Date(oldRow.session_start);
+          let endSess = new Date(oldRow.session_end);
+          return {
+            date: startSess.toISOString().split('T')[0],
+            start: startSess.toTimeString().match(timeFormat)[0],
+            end: endSess.toTimeString().match(timeFormat)[0],
+          };
+        });
+
+        let deadlineParts =  new Date(dbRes.rows[0]['course_deadline']);
+        let deadline = {
+          date: deadlineParts.toISOString().split('T')[0],
+          time: deadlineParts.toTimeString().match(timeFormat)[0]
+        }
+
+        let inputObject = {
+          id: courseID,
+          title: dbRes.rows[0]['course_name'],
+          topic: dbRes.rows[0]['topic'],
+          location: dbRes.rows[0]['location'],
+          description: dbRes.rows[0]['description'],
+          sessionNum: dbRes.rows[0]['sessions'],
+          sessions: formattedDates,
+          deadline: deadline,
+          seats: dbRes.rows[0]['seat_capacity'],
+        }
+        return res.render('pages/editCourse', inputObject);
+      } else {
+        return res.json("Could not retrieve course records");
+      }
+    })
 
 
   },

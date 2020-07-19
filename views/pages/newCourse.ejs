@@ -29,6 +29,7 @@
     let removeButton = document.getElementById('removeSession');
     let outerSession = document.getElementById('outerSession');
     let sessionTracker = document.getElementById('sessionTracker');
+    let deadline = document.getElementById('deadline');
 
 
     function validateForm() {
@@ -47,15 +48,29 @@
           return false;
         }
 
+
+
         let dates = document.getElementsByClassName('date-wrapper');
         let starts = document.getElementsByClassName('start-wrapper');
         let ends = document.getElementsByClassName('end-wrapper');
         if (dates.length !== starts.length || dates.length !== ends.length || ends.length !== starts.length) {
           return false;
         }
+
+        //time-related checks
         let previousStart = new Date(0);
         let previousEnd = new Date();
         let creationTime = new Date();
+
+        //check that registration deadline is before the course begins
+        //by default, 11:59 pm on the date specified (in the timezone of the server)
+        let deadlineDate = new Date(deadline.value + ' ' + deadTime.value);
+        let startTime = new Date(dates[0].lastElementChild.value + ' ' + starts[0].lastElementChild.value);
+        if (startTime < deadlineDate) {
+          alert("Cannot schedule registration deadline after the first course session.");
+          return false;
+        }
+
         for (let i = 0; i < dates.length; i++) {
           let startDateTime = new Date(dates[i].lastElementChild.value + ' ' + starts[i].lastElementChild.value);
           let endDateTime = new Date(dates[i].lastElementChild.value + ' ' + ends[i].lastElementChild.value);
