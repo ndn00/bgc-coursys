@@ -172,9 +172,33 @@ module.exports = {
       } else {
         return res.json("Could not retrieve course records");
       }
+    });
+  },
+
+  editCourse: (req, res) => {
+    let courseID = parseInt(req.params.id, 10);
+    let updateCourseDetails = `
+    UPDATE courses
+    SET course_name=$1, topic=$2, location=$3, sessions=$4, seat_capacity=$5, description=$6, course_deadline=$7
+    WHERE id=$8;
+    `;
+    let updateCourseContent = [
+      req.body.coursename,
+      req.body.topic,
+      req.body.location,
+      req.body.sessionTracker,
+      req.body.capacity,
+      req.body.description,
+      (req.body.deadline + ' ' + req.body.deadTime),
+      courseID
+    ];
+    database.query(updateCourseDetails, updateCourseContent, (dbErr, dbRes) => {
+      if (dbErr) {
+        return res.json("Database error - updating main course details");
+      }
+      //add session updates here
+      return res.redirect('/organizer/main');
     })
-
-
   },
 
 }

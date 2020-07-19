@@ -7,7 +7,8 @@ let chai = require('chai');
 let expect = chai.expect;
 
 const loginURL = 'https://cmpt276-bgc-coursys.herokuapp.com/login';
-const logoutURL = 'https://cmpt276-bgc-coursys.herokuapp.com/logout'
+const logoutURL = 'https://cmpt276-bgc-coursys.herokuapp.com/logout';
+const localLogin = 'localhost:5000/login';
 
 describe('login-interactions', function() {
   //set timeout to be longer to account for internet issues
@@ -116,25 +117,54 @@ describe('login-interactions', function() {
     expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/main');
     await driver.get(logoutURL);
   });
-  it('should return the redirect page when logging out', async function() {
-    await driver.get(loginURL);
-    await driver.sleep(2000);
-    await driver.findElement(By.name('uname')).sendKeys('test-attendee@bgcengineering.ca');
-    await driver.findElement(By.name('pwd')).sendKeys('11111111aA');
-    await driver.findElement(By.id('loginSubmit')).click();
-    const curURL = await driver.getCurrentUrl();
-
-    expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/main');
-    await driver.sleep(1000);
-    await driver.findElement(By.id('logoutButton')).click();
-
-    const logoutTestURL = await driver.getCurrentUrl();
-    expect(logoutTestURL).to.equal(logoutURL);
-
-  });
-  it('should return the login page after (currently 4000) ms on the redirect page');
+  it('should return the login page after logging out');
 
 
   after(async () => driver.quit());
 
+});
+
+
+describe('local-main', function() {
+  //for localhost testing, timing should be more restrictive
+  this.timeout(10000);
+  const driver = new Builder().forBrowser('chrome').build();
+
+  it('sidebar should contain four elements for attendee user');
+  it('sidebar should contain four elements for organizer user');
+  it('on organizer nav, clicking second button should return to /organizer/main');
+  it('on organizer nav, clicking third button should go to /organizer/allusers (user config page)');
+  it('on attendee nav, clicking second button should return to /main');
+  //logout functionality tested above
+
+  after(async () => driver.quit());
+});
+
+describe('local-courses', function() {
+  //for localhost testing, timing should be more restrictive
+  this.timeout(10000);
+  const driver = new Builder().forBrowser('chrome').build();
+
+  //course creation
+  describe('local-course-creation', function() {
+    it('Attendees should get a 401 Unauthorized status if they try to create a course')
+    it('Creating a session in the past should prompt an alert');
+    it('Creating sessions out of chronological order should prompt an alert');
+    it('Creating sessions with overlapping times should prompt an alert');
+    it('Creating sessions with the end time before the start time should prompt an alert');
+    it('Setting the registration deadline in the past should prompt an alert');
+    it('Setting the registration deadline after the first session should prompt an alert');
+    it('Successfully creating a new course will redirect back to the organizer main');
+  });
+  //course access
+  describe('local-course-access', function() {
+
+  });
+
+  //course editing
+  describe('local-course-editing', function() {
+
+  });
+
+  after(async () => driver.quit());
 });

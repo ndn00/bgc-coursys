@@ -70,6 +70,10 @@
           alert("Cannot schedule registration deadline after the first course session.");
           return false;
         }
+        if (deadlineDate < creationTime) {
+          alert("Cannot schedule registration deadline in the past.");
+          return false;
+        }
 
         for (let i = 0; i < dates.length; i++) {
           let startDateTime = new Date(dates[i].lastElementChild.value + ' ' + starts[i].lastElementChild.value);
