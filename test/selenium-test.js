@@ -9,6 +9,7 @@ let expect = chai.expect;
 const loginURL = 'https://cmpt276-bgc-coursys.herokuapp.com/login';
 const logoutURL = 'https://cmpt276-bgc-coursys.herokuapp.com/logout';
 const localLogin = 'localhost:5000/login';
+const localLogout = 'locatlhost:5000/logout';
 
 describe('login-interactions', function() {
   //set timeout to be longer to account for internet issues
@@ -130,11 +131,72 @@ describe('local-main', function() {
   this.timeout(10000);
   const driver = new Builder().forBrowser('chrome').build();
 
-  it('sidebar should contain four elements for attendee user');
-  it('sidebar should contain four elements for organizer user');
-  it('on organizer nav, clicking second button should return to /organizer/main');
-  it('on organizer nav, clicking third button should go to /organizer/allusers (user config page)');
-  it('on attendee nav, clicking second button should return to /main');
+  it('sidebar should contain four elements for attendee user', async function() {
+    await driver.get(localLogin);
+    await driver.sleep(1000);
+    await driver.findElement(By.name('uname')).sendKeys('test-attendee@bgcengineering.ca');
+    await driver.findElement(By.name('pwd')).sendKeys('11111111aA');
+    await driver.findElement(By.id('loginSubmit')).click();
+
+    const links = driver.findElements(By.className('nav-item'));
+
+    expect(links.length).to.equal(4);
+    await driver.get(localLogout);
+
+  });
+  it('sidebar should contain four elements for organizer user' async function() {
+    await driver.get(localLogin);
+    await driver.sleep(1000);
+    await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+    await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+    await driver.findElement(By.id('loginSubmit')).click();
+    const links = driver.findElements(By.className('nav-item'));
+
+    expect(links.length).to.equal(4);
+    await driver.get(localLogout);
+  });
+  it('on organizer nav, clicking second button should return to /organizer/main', async function() {
+    await driver.get(localLogin);
+    await driver.sleep(1000);
+    await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+    await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+    await driver.findElement(By.id('loginSubmit')).click();
+    await driver.findElement(By.id('returnToMain')).click();
+    const curURL = await driver.getCurrentUrl();
+
+    expect(curURL).to.equal('localhost:5000/organizer/main');
+
+    await driver.get(localLogout);
+  });
+
+  it('on organizer nav, clicking third button should go to /organizer/allusers (user config page)', async function() {
+    await driver.get(localLogin);
+    await driver.sleep(1000);
+    await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+    await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+    await driver.findElement(By.id('loginSubmit')).click();
+    await driver.findElement(By.id('allusers')).click();
+    const curURL = await driver.getCurrentUrl();
+
+    expect(curURL).to.equal('localhost:5000/organizer/allusers');
+
+    await driver.get(localLogout);
+
+
+  });
+  it('on attendee nav, clicking second button should return to /main', async function() {
+    await driver.get(localLogin);
+    await driver.sleep(1000);
+    await driver.findElement(By.name('uname')).sendKeys('test-attendee@bgcengineering.ca');
+    await driver.findElement(By.name('pwd')).sendKeys('11111111aA');
+    await driver.findElement(By.id('loginSubmit')).click();
+    await driver.findElement(By.id('attendeeMain')).click();
+    const curURL = await driver.getCurrentUrl();
+
+    expect(curURL).to.equal('localhost:5000/organizer/allusers');
+
+    await driver.get(localLogout);
+  });
   //logout functionality tested above
 
   after(async () => driver.quit());
@@ -147,8 +209,26 @@ describe('local-courses', function() {
 
   //course creation
   describe('local-course-creation', function() {
-    it('Attendees should get a 401 Unauthorized status if they try to create a course')
-    it('Creating a session in the past should prompt an alert');
+    it('Attendees should get a 401 Unauthorized status if they try to create a course', async function() {
+      await driver.get(localLogin);
+      await driver.sleep(1000);
+      await driver.findElement(By.name('uname')).sendKeys('test-attendee@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('11111111aA');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('localhost:5000/courses/new');
+      const message401 = driver.findElement(By.class('pre')).getText();
+
+      expect(message401).to.equal('Unauthorized');
+      await driver.get(localLogout);
+    })
+    it('Creating a session in the past should prompt an alert', async function() {
+      await driver.get(localLogin);
+      await driver.sleep(1000);
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('localhost:5000/courses/new');
+    });
     it('Creating sessions out of chronological order should prompt an alert');
     it('Creating sessions with overlapping times should prompt an alert');
     it('Creating sessions with the end time before the start time should prompt an alert');
@@ -158,7 +238,14 @@ describe('local-courses', function() {
   });
   //course access
   describe('local-course-access', function() {
-
+    it('Users must be logged in to access a course path');
+    it('Accessing a non-existent course will return a status code')
+    it('For a valid course, the title must show up');
+    it('For a valid course, the topic must be present');
+    it("For a valid course, the location must be present");
+    it("For a valid course, the maximum number of seats must be present");
+    it("For a valid course, the registration deadline must be present");
+    it("For a valid course, there should be at least one session with indicated date, start, and end times")
   });
 
   //course editing
