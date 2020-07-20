@@ -228,9 +228,73 @@ describe('local-courses', function() {
       await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
       await driver.findElement(By.id('loginSubmit')).click();
       await driver.get('localhost:5000/courses/new');
+
+      //April 20, 2020 (before this course started)
+      //8 AM - 10 AM (legal time)
+      await driver.findElement(By.id('sessionDate1')).sendKeys('2020-04-20');
+      await driver.findElement(By.id('startTime1')).sendKeys('08:00');
+      await driver.findElement(By.id('endTime1')).sendKeys('10:00');
+
+      await driver.findElement(By.id('submitButton')).click();
+      const error = await driver.switchTo().alert().getText();
+
+      expect(error).to.equal('Cannot schedule registration deadline in the past.');
+
+      await driver.get(localLogout);
     });
-    it('Creating sessions out of chronological order should prompt an alert');
-    it('Creating sessions with overlapping times should prompt an alert');
+    it('Creating sessions out of chronological order should prompt an alert', async function() {
+      await driver.get(localLogin);
+      await driver.sleep(1000);
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('localhost:5000/courses/new');
+
+      //create session on September 1, 10 AM - 12 PM
+      await driver.findElement(By.id('sessionDate1')).sendKeys('2020-09-01');
+      await driver.findElement(By.id('startTime1')).sendKeys('10:00');
+      await driver.findElement(By.id('endTime1')).sendKeys('12:00');
+      //create new session
+      await driver.findElement(By.id('addSession')).click();
+
+      //create session on August 31, 10 AM - 12 PM
+      await driver.findElement(By.id('sessionDate2')).sendKeys('2020-08-31');
+      await driver.findElement(By.id('startTime2')).sendKeys('10:00');
+      await driver.findElement(By.id('endTime2')).sendKeys('12:00');
+      await driver.findElement(By.id('submitButton')).click();
+
+      const error = await driver.switchTo().alert().getText();
+
+      expect(error).to.equal('Sessions should be scheduled in chronological order');
+      await driver.get(localLogout);
+
+    });
+    it('Creating sessions with overlapping times should prompt an alert', async function() {
+      await driver.get(localLogin);
+      await driver.sleep(1000);
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('localhost:5000/courses/new');
+
+      //create session on September 1, 10 AM - 12 PM
+      await driver.findElement(By.id('sessionDate1')).sendKeys('2020-09-01');
+      await driver.findElement(By.id('startTime1')).sendKeys('10:00');
+      await driver.findElement(By.id('endTime1')).sendKeys('12:00');
+
+      //create new session on September 1, 11 AM - 1 PM
+      await driver.findElement(By.id('addSession')).click();
+      await driver.findElement(By.id('sessionDate2')).sendKeys('2020-09-01');
+      await driver.findElement(By.id('startTime2')).sendKeys('11:00');
+      await driver.findElement(By.id('endTime2')).sendKeys('13:00');
+
+      await driver.findElement(By.id('submitButton')).click();
+
+      const error = await driver.switchTo().alert().getText();
+
+      expect(error).to.equal('Sessions should not overlap (previous session must end before next session starts)');
+      await driver.get(localLogout);
+    });
     it('Creating sessions with the end time before the start time should prompt an alert');
     it('Setting the registration deadline in the past should prompt an alert');
     it('Setting the registration deadline after the first session should prompt an alert');
