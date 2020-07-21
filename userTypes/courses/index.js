@@ -197,7 +197,46 @@ module.exports = {
         return res.json("Database error - updating main course details");
       }
       //add session updates here
-      return res.redirect('/organizer/main');
+      //Use session ids
+      //Check how many sessions there are
+      //If new contains less, remove sessions (starting from greatest ID), update the rest
+      //If new contains more,
+
+      //Alternatively, delete sessions matching ID
+      //create new ones
+      //Intended to be a temporary solution
+      let tempDelete = `DELETE FROM course_sessions WHERE course_id=$1;`
+      database.query(tempDelete, [courseID], (dbErr1, dbRes1) => {
+        if (dbErr1) {
+          return res.json("Database error - removing old session details")
+        }
+        let numSessions = parseInt(req.body.sessionTracker, 10);
+        let insertSession = [];
+
+        //construct query
+        let insertSessionQuery = 'INSERT INTO course_sessions (course_id, session_start, session_end) VALUES\n';
+        for (let i = 1; i <= numSessions; i++) {
+            insertSessionQuery += '(';
+            insertSession.push(courseID);
+            insertSession.push(req.body['sessionDate' + i] + ' ' + req.body['startTime' + i]);
+            insertSession.push(req.body['sessionDate' + i] + ' ' + req.body['endTime' + i]);
+            insertSessionQuery += `$${(i-1)*3 + 1}, $${(i-1)*3 + 2}, $${(i-1)*3 + 3})`
+            if (i < numSessions) {
+              insertSessionQuery += ',\n';
+            }
+
+        }
+        insertSessionQuery += ';'
+        database.query(insertSessionQuery, insertSession, (dbErr2, dbRes2) => {
+          if (dbErr2) {
+            return res.json("Database error - inserting new session records");
+          }
+          return res.redirect('/organizer/main');
+        })
+      })
+
+
+
     })
   },
 

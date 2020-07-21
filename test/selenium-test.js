@@ -138,22 +138,23 @@ describe('local-main', function() {
     await driver.findElement(By.name('pwd')).sendKeys('11111111aA');
     await driver.findElement(By.id('loginSubmit')).click();
 
-    const links = driver.findElements(By.className('nav-item'));
-
-    expect(links.length).to.equal(4);
+    const links = await driver.findElements(By.className('nav-item'));
     await driver.get(localLogout);
+    expect(links.length).to.equal(4);
+
 
   });
-  it('sidebar should contain four elements for organizer user' async function() {
+  it('sidebar should contain four elements for organizer user', async function() {
     await driver.get(localLogin);
     await driver.sleep(1000);
     await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
     await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
     await driver.findElement(By.id('loginSubmit')).click();
-    const links = driver.findElements(By.className('nav-item'));
-
-    expect(links.length).to.equal(4);
+    await driver.sleep(1000);
+    const links = await driver.findElements(By.className('nav-item'));
     await driver.get(localLogout);
+    expect(links.length).to.equal(4);
+
   });
   it('on organizer nav, clicking second button should return to /organizer/main', async function() {
     await driver.get(localLogin);
@@ -163,10 +164,10 @@ describe('local-main', function() {
     await driver.findElement(By.id('loginSubmit')).click();
     await driver.findElement(By.id('returnToMain')).click();
     const curURL = await driver.getCurrentUrl();
-
+    await driver.get(localLogout);
     expect(curURL).to.equal('localhost:5000/organizer/main');
 
-    await driver.get(localLogout);
+
   });
 
   it('on organizer nav, clicking third button should go to /organizer/allusers (user config page)', async function() {
@@ -177,10 +178,10 @@ describe('local-main', function() {
     await driver.findElement(By.id('loginSubmit')).click();
     await driver.findElement(By.id('allusers')).click();
     const curURL = await driver.getCurrentUrl();
-
+    await driver.get(localLogout);
     expect(curURL).to.equal('localhost:5000/organizer/allusers');
 
-    await driver.get(localLogout);
+
 
 
   });
@@ -192,10 +193,10 @@ describe('local-main', function() {
     await driver.findElement(By.id('loginSubmit')).click();
     await driver.findElement(By.id('attendeeMain')).click();
     const curURL = await driver.getCurrentUrl();
-
+    await driver.get(localLogout);
     expect(curURL).to.equal('localhost:5000/organizer/allusers');
 
-    await driver.get(localLogout);
+
   });
   //logout functionality tested above
 

@@ -12,17 +12,17 @@
   <%- include ('../partials/orgNav.ejs') %>
 
     <div class="container justify-content-center">
-        <form id="courseForm" class="justify-content-around" method="POST" action="<%= 'courses/edit/' + id %>"
+        <form id="courseForm" class="justify-content-around" method="POST" action="<%= '/courses/edit/' + id %>"
             onsubmit="return validateForm()">
             <h2 class="mt-5">Edit Course</h2>
             <div class="form-row mt-3">
               <div class="col-6 mb-3">
                 <label for="coursename">Course Name</label>
-                <input type="text" class="form-control" id="coursename" name="coursename" required="true" value=<%= title %>>
+                <input type="text" class="form-control" id="coursename" name="coursename" required="true" value='<%= title %>'>
               </div>
               <div class="col-5 mb-3">
                 <label for="topic">Topic</label>
-                <input type="text" class="form-control" id="topic" name="topic" required="true" value=<%= topic %>>
+                <input type="text" class="form-control" id="topic" name="topic" required="true" value='<%= topic %>'>
               </div>
             </div>
             <div class="form-row">
@@ -84,7 +84,7 @@
               </div>
             </div>
             <input type="number" id="sessionTracker" name="sessionTracker" value=<%= sessionNum %> hidden>
-            <input type="submit" class="btn btn-dark" value="Create New Course">
+            <input type="submit" class="btn btn-dark" value="Edit Course">
         </form>
     </div>
 
@@ -102,6 +102,9 @@
     let sessionTracker = document.getElementById('sessionTracker');
     let deadline = document.getElementById('deadline');
 
+    if (numSessions > 1) {
+      removeButton.removeAttribute("hidden");
+    }
 
     function validateForm() {
         //check that sessions do not overlap

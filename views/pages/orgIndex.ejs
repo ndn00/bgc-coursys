@@ -39,6 +39,8 @@
             <th scope="col">Sessions</th>
             <th scope="col">Seats</th>
             <th scope="col">Details</th>
+            <!-- Actions - can remove if necessary-->
+            <th scope="col">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -52,6 +54,11 @@
             <!-- <td><%= item.seats %>/<%= item.maxSeats %></td> current seats not available yet-->
             <td><%= item.maxSeats %></td>
             <td><%= item.status %></td>
+            <td>
+              <div id=<%= 'actions' + item.id %>>
+                <a id=<%= 'edit' + item.id %> href=<%="/courses/edit/" + item.id %>><i class="material-icons md-36">edit</i></a>
+              </div>
+            </td>
           </tr>
           <% }); %>
         </tbody>
@@ -59,12 +66,15 @@
     </div>
   </div>
   <script>
+    /*
+    Not ideal to run edit/delete through main page without fine control over details, so will remove
     window.onload = () => {
       $('#tb').SetEditable({
         // TODO: Add event handlers
       });
       console.log("hi");
     }
+    */
   </script>
 </body>
 

@@ -26,7 +26,8 @@ module.exports = {
                         let startDate = new Date(dbRes.rows[row].start_date);
                         data.push(
                             {
-                                title: dbRes.rows[row].course_name,
+																id: dbRes.rows[row].id,
+																title: dbRes.rows[row].course_name,
                                 topic: dbRes.rows[row].topic,
                                 delivery: dbRes.rows[row].location,
                                 //time: startDate.toLocaleString("en-US", dateFormat),

@@ -12,21 +12,23 @@
     <% } %>
 
     <div class="container">
-      <div class="row">
+      <div class="row pl-4 pt-4">
         <!--Course Name-->
         <h1><%= title %></h1>
       </div>
-      <div class="row">
+      <div class="row pl-4 pb-2">
         <h3><%= topic %></h3>
       </div>
-      <div class="row">
+      <hr class="pb-3"/>
+      <div class="row pl-4 pb-2">
         <h3>Location: <%= location %></h3>
       </div>
-      <div class="row">
+      <div class="row pl-4 pb-2">
         <p><%= description %></p>
       </div>
-      <div class="row">
-        <h3>Number of Sessions: <%= sessionNum %></h3>
+      <hr class="pb-2"/>
+      <div class="row pl-4 pb-1 pt-3">
+        <h3>Sessions</h3>
       </div>
       <div class="row">
         <table class="table table-striped">
@@ -48,8 +50,8 @@
           </tbody>
         </table>
       </div>
-      <div class="row">
-        <h3>Number of seats: <%= seats %></h3>
+      <div class="row pl-4 pb-5">
+        <h4>Number of seats: <%= seats %></h4>
       </div>
       <div class="row">
         <form action="/courses/register/<%= id %>" method="POST">
