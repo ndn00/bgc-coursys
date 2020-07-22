@@ -1,6 +1,7 @@
 //index.js
 //handles organizer-only functions
 const database = require('../../database');
+const sgMail = require('@sendgrid/mail');
 
 module.exports = {
 
@@ -111,6 +112,50 @@ module.exports = {
 
 	newCourse: (request, result) => {
 		result.render('pages/newCourse');
+	},
+
+	sendReminders: async (req, res) => {
+		// using Twilio SendGrid's v3 Node.js Library
+		// https://github.com/sendgrid/sendgrid-nodejs  
+		sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+		try {
+		let getEmails = 
+		`SELECT u.email FROM users u, enrollment e, courses c
+		WHERE c.id=e.course_id and e.user_id=u.id and c.id=${req.params.id}`;
+		let getCourseInfo =
+		`SELECT * FROM courses WHERE id=${req.params.id}`;
+		let emails = await database.query(getEmails);
+		let courseInfo = await database.query(getCourseInfo);
+		courseInfo = courseInfo.rows;
+		console.log(courseInfo);
+		for (row of emails.rows) {
+			if (courseInfo === undefined) {
+			break;
+			}
+			const msg = {
+			to: row.email,
+			from: 'mla283@sfu.ca',
+			subject: `Course Reminder: ${courseInfo[0].course_name}`,
+			text: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} 
+					which is scheduled for ${courseInfo[0].start_date} at ${courseInfo[0].location}.
+					
+					To view more information please visit cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}`,
+			html: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} which is scheduled for 
+					<br>
+					<strong>${courseInfo[0].start_date}</strong> at <strong>${courseInfo[0].location}</strong>.
+					<br><br>
+					To view more information please visit 
+					<a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}">
+					cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}</a>`,
+			};
+			console.log(msg);
+			console.log(await sgMail.send(msg));
+		}
+		res.send("Ok");    
+		} catch(err) {
+		console.log(err);
+		res.send("Error sending email");
+		}
 	}
 
 
