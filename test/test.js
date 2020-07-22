@@ -86,7 +86,7 @@ describe('login', function() {
       .post('/login')
       .send({'uname': 'test-organizer@bgcengineering.ca', 'pwd': 'teamBPtestpassword1'})
       .end(function (err, res) {
-        res.should.have.status(200);
+        res.should.have.status(401);
         res.should.be.a('object');
         done();
       });

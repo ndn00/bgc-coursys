@@ -19,6 +19,7 @@
     <input type="text" class="form-control" id="location" name="location">
   </div>
 </div>
+<!-- Old single-date form
 <div class="form-row">
   <div class="col-4 mb-3">
     <label for="Start Date">Start Date</label>
@@ -39,10 +40,35 @@
     <input type="time" class="form-control" id="endtime" name="endtime" required="true">
   </div>
 </div>
+-->
+<div id="outerSession">
+  <%- include('./session.ejs') %>
+</div>
+<div class="form-row">
+  <div class="col-2 mb-3">
+    <button class="btn btn-dark" type="button" id="addSession" name="addSession">Add Session</button>
+  </div>
+</div>
+<div class="form-row">
+  <div class="col-2 mb-3">
+    <button class="btn btn-dark" type="button" id="removeSession" name="removeSession" hidden>Remove Session</button>
+  </div>
+</div>
+<div class="form-row">
+  <div class="col-3 mb-3">
+    <label for="deadline">Registration Deadline Date</label>
+    <input type="date" class="form-control" id="deadline" name="deadline" value="" required>
+  </div>
+  <div class="col-3 mb-3">
+      <label for="deadTime">Registration Deadline Time</label>
+      <input type="time" class="form-control" id="deadTime" name="deadTime" value="23:59" required>
+  </div>
+</div>
 <div class="form-row">
   <div class="col-10 mb-4">
-    <label for="">Description</label>
+    <label for="description">Description</label>
     <textarea class="form-control" id="description" name="description" rows="5"></textarea>
   </div>
 </div>
-<input type="submit" class="btn btn-dark" value="Create New Course">
+<input type="number" id="sessionTracker" name="sessionTracker" value="1" hidden>
+<input type="submit" id="submitButton" class="btn btn-dark" value="Create New Course">

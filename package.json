@@ -8,7 +8,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "mocha"
+    "test": "mocha",
+    "test-local-main": "mocha --grep 'local-main'",
+    "test-local-courses": "mocha --grep 'local-courses'"
   },
   "repository": {
     "type": "git",
