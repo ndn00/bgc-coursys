@@ -1,0 +1,4 @@
+.superCenter {
+    display: grid;
+    place-items:center;
+}
