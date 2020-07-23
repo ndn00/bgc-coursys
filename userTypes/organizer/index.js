@@ -50,7 +50,7 @@ module.exports = {
 	//as of now, organizer accounts must be manually created
 	allusers: (request, result) => {
 		//access database
-		database.query('SELECT id, email, type FROM users;', (err, dbRes) => {
+		database.query('SELECT id, email, type, approved FROM users;', (err, dbRes) => {
 			if (err) {
 				return result.json("Could not retrieve database values to show all users");
 			}
@@ -66,6 +66,10 @@ module.exports = {
 		let attendeeParams = [];
 		let newOrganizers = [];
 		let organizerParams = [];
+		let newApproved = [];
+		let approvedParams = [];
+		let newDisable = [];
+		let disableParms = [];
 
 
 		for (let i = 1; i <= tableSize; i++) {
@@ -78,32 +82,66 @@ module.exports = {
 				}
 				//update database, set type to organizer for users
 				//update database, set type to attendee for users
+				if (request.body["approved" + i] === 'true') {
+					newApproved.push(i);
+				}
+				else {
+					newDisable.push(i);
+				}
 			}
 
 		}
-		for (let j = 1; j <= newAttendees.length; j++) {
-			attendeeParams.push('$' + j);
+		for (let j = 0; j < newAttendees.length; j++) {
+			attendeeParams.push(newAttendees[j]);
 		}
-		for (let k = 1; k <= newOrganizers.length; k++) {
-			organizerParams.push('$' + k);
+		for (let k = 0; k < newOrganizers.length; k++) {
+			organizerParams.push(newOrganizers[k]);
+		}
+		for (let l = 0; l < newApproved.length; l++) {
+			approvedParams.push(newApproved[l]);
+		}
+		for (let m = 0; m < newDisable.length; m++) {
+			disableParms.push(newDisable[m]);
 		}
 		let newAttendeeQuery = "UPDATE users SET type='attendee' WHERE id IN (" + attendeeParams.join(',') + ");"
 		let newOrganizerQuery = "UPDATE users SET type='organizer' WHERE id IN (" + organizerParams.join(',') + ");"
+		let newApprovedQuery = "UPDATE users SET approved=true WHERE id IN (" + approvedParams.join(',') + ");"
+		let newDisableQuery = "UPDATE users SET approved=false WHERE id IN (" + disableParms.join(',') + ");"
 		console.log(newAttendees);
 		console.log(newAttendeeQuery);
 		console.log(newOrganizers);
 		console.log(newOrganizerQuery);
+		console.log(newApproved);
+		console.log(approvedParams);
+		console.log(newApprovedQuery);
+		console.log(newDisable);
+		console.log(newDisableQuery);
 		if (newAttendees.length > 0) {
-			database.query(newAttendeeQuery, newAttendees, (dbErr, dbRes) => {
+			database.query(newAttendeeQuery, (dbErr, dbRes) => {
 				if (dbErr) {
 					return result.send("Database error - could not update new attendees");
 				}
 			});
 		}
 		if (newOrganizers.length > 0) {
-			database.query(newOrganizerQuery, newOrganizers, (dbErr, dbRes) => {
+			database.query(newOrganizerQuery, (dbErr, dbRes) => {
 				if (dbErr) {
 					return result.send("Database error - could not update new organizers");
+				}
+			});
+		}
+		if (newApproved.length > 0) {
+			database.query(newApprovedQuery, (dbErr, dbRes) => {
+				if (dbErr) {
+					return result.send("Database error - could not update new approved");
+				}
+			});
+		}
+		if (newDisable.length > 0) {
+			database.query(newDisableQuery, (dbErr, dbRes) => {
+				if (dbErr) {
+					console.log(dbErr);
+					return result.send("Database error - could not update new disabled");
 				}
 			});
 		}

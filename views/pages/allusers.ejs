@@ -25,6 +25,7 @@
               <th scope='col'>ID</th>
               <th scope='col'>Email</th>
               <th scope='col'>Status</th>
+              <th scope='col'>Approval</th>
             </tr>
           </thead>
           <tbody>
@@ -58,6 +59,28 @@
                   <div>
                     <input type="radio" name=<%= "status" + user.id %>  value="attendee" checked>
                     <label for="attendee">Attendee</label>
+                  </div>
+                <% } %>
+              </td>
+              <td>
+                <!-- Based on the user status, have a different radio button checked by default-->
+                <% if (user.approved === true) {%>
+                <div>
+                  <input type="radio" name=<%= "approved" + user.id %> value="true" checked>
+                  <label for="true">Activated</label>
+                </div>
+                <div>
+                  <input type="radio" name=<%= "approved" + user.id %>  value="false">
+                  <label for="false">Not Activated</label>
+                </div>
+                <% } else { %>
+                  <div>
+                    <input type="radio" name=<%= "approved" + user.id %> value="true">
+                    <label for="true">Activated</label>
+                  </div>
+                  <div>
+                    <input type="radio" name=<%= "approved" + user.id %>  value="false" checked>
+                    <label for="false">Not Activated</label>
                   </div>
                 <% } %>
               </td>
