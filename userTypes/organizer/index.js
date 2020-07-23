@@ -133,7 +133,10 @@ module.exports = {
 		let nextDate = await database.query(getNextSession);
 		courseInfo = courseInfo.rows;
 		nextDate = nextDate.rows[0].session_start;
-		console.log(courseInfo);
+		console.log(emails);
+		if (emails.rowCount === 0) {
+			res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'No users enrolled, no emails sent.', target: 'the course view'});  
+		}
 		for (row of emails.rows) {
 			if (courseInfo === undefined) {
 			break;
@@ -161,7 +164,7 @@ module.exports = {
 		res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'Email sent successfully!', target: 'the course view'});  
 		} catch(err) {
 			console.log(err);
-			res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'ERROR: EMAIL NOT SENT!', target: 'the course view'});  
+			res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'ERROR: EMAIL NOT SENT! API failure.', target: 'the course view'});  
 		}
 	}
 
