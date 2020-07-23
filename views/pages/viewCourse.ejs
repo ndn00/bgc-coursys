@@ -58,6 +58,20 @@
           <input type="submit" class="btn btn-dark" value="Register">
         </form>
       </div>
+
+
+      <% if (isOrganizer) { %>
+        <div class="row pl-4 pt-4">
+          <h3>Organizer Only</h3>
+        </div>
+        <div class="row">
+          <form action="/organizer/sendReminder/<%= id %>" method="POST">
+            <input type="checkbox" id="emailConf" name="emailConf" required="true">
+            <label for="emailConf"> I am aware this will send an email to all users enrolled</label><br>
+            <input type="submit" class="btn btn-dark" value="Send Reminder to Participants" id="emailSendSubmit">
+          </form>
+        </div>
+      <% } %>
     </div>
 
   </body>

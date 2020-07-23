@@ -1,6 +1,7 @@
 //index.js
 //handles organizer-only functions
 const database = require('../../database');
+const sgMail = require('@sendgrid/mail');
 
 module.exports = {
 
@@ -112,6 +113,59 @@ module.exports = {
 
 	newCourse: (request, result) => {
 		result.render('pages/newCourse');
+	},
+
+	sendReminders: async (req, res) => {
+		// using Twilio SendGrid's v3 Node.js Library
+		// https://github.com/sendgrid/sendgrid-nodejs  
+		sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+		try {
+		let getEmails = 
+		`SELECT u.email FROM users u, enrollment e, courses c
+		WHERE c.id=e.course_id and e.user_id=u.id and c.id=${req.params.id};`;
+		let getCourseInfo =
+		`SELECT * FROM courses WHERE id=${req.params.id};`;
+		let getNextSession =
+		`SELECT * FROM course_sessions WHERE course_id=${req.params.id} AND 
+		session_start >= CURRENT_DATE ORDER BY session_start ASC;`
+		let emails = await database.query(getEmails);
+		let courseInfo = await database.query(getCourseInfo);
+		let nextDate = await database.query(getNextSession);
+		courseInfo = courseInfo.rows;
+		nextDate = nextDate.rows[0].session_start;
+		console.log(emails);
+		if (emails.rowCount === 0) {
+			res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'No users enrolled, no emails sent.', target: 'the course view'});  
+		}
+		for (row of emails.rows) {
+			if (courseInfo === undefined) {
+			break;
+			}
+			const msg = {
+			to: row.email,
+			from: 'mla283@sfu.ca',
+			subject: `Course Reminder: ${courseInfo[0].course_name}`,
+			text: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} 
+					which is scheduled for ${nextDate} in ${courseInfo[0].location}.
+					
+					To view more information please visit cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}`,
+			html: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} which is scheduled for 
+					<br>
+					<strong>${nextDate}</strong> in <strong>${courseInfo[0].location}</strong>.
+					<br><br>
+					To view more information please visit 
+					<a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}">
+					cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}</a>`,
+			};
+			console.log(msg);
+			// will go to catch on failure
+			console.log(await sgMail.send(msg));
+		}
+		res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'Email sent successfully!', target: 'the course view'});  
+		} catch(err) {
+			console.log(err);
+			res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'ERROR: EMAIL NOT SENT! API failure.', target: 'the course view'});  
+		}
 	}
 
 

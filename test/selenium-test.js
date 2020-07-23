@@ -405,6 +405,74 @@ describe('login-interactions', function() {
 
     });
 
+    // email paths
+    describe('no-users-enrolled', () => {
+      await driver.get(loginURL);
+      await driver.sleep(20000);
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/24');
+
+      await driver.findElement(By.id('emailConf')).click();
+      await driver.findElement(By.id('emailSendSubmit')).click();
+
+      const message = await driver.findElement(By.id('redirectMessage')).getText();
+      expect(message).to.equal('No users enrolled, no emails sent. You will be redirected to the course view.');
+    });
+
+    describe('no-users-enrolled', () => {
+      await driver.get(loginURL);
+      await driver.sleep(20000);
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/23');
+
+      await driver.findElement(By.id('emailConf')).click();
+      await driver.findElement(By.id('emailSendSubmit')).click();
+
+      const message = await driver.findElement(By.id('redirectMessage')).getText();
+      await driver.get(logoutURL);
+      expect(message).to.equal('No users enrolled, no emails sent. You will be redirected to the course view.');
+    });
+
+    describe('email-success', () => {
+      await driver.get(loginURL);
+      await driver.sleep(20000);
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/23');
+
+      await driver.findElement(By.id('emailConf')).click();
+      await driver.findElement(By.id('emailSendSubmit')).click();
+
+      const message = await driver.findElement(By.id('redirectMessage')).getText();
+      await driver.get(logoutURL);
+      expect(message).to.equal('Email sent successfully! You will be redirected to the course view.');
+    });
+
+    // a true failure will result in an instance when the api fails and throws an err
+    // a case where this happens is if the api key is messing
+    // to test remove the api key
+
+    // describe('email-api-fail', () => {
+    //   await driver.get(loginURL);
+    //   await driver.sleep(20000);
+    //   await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+    //   await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+    //   await driver.findElement(By.id('loginSubmit')).click();
+    //   await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/24');
+
+    //   await driver.findElement(By.id('emailConf')).click();
+    //   await driver.findElement(By.id('emailSendSubmit')).click();
+
+    //   const message = await driver.findElement(By.id('redirectMessage')).getText();
+    //   await driver.get(logoutURL);
+    //   expect(message).to.equal('ERROR: EMAIL NOT SENT! API failure. You will be redirected to the course view.');
+    // });
+
 });
 
 
