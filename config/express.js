@@ -13,6 +13,7 @@ const methodOverride = require('method-override');
 const config = require('./');
 
 module.exports = (app, passport, pool) => {
+  app.get('/', (req, res) => {res.redirect('/login')});
   //utilities
   //static directories
   app.use(express.static(path.join(process.cwd(), 'public')));

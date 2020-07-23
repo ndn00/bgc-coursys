@@ -42,16 +42,13 @@ module.exports = (app, passport, database) => {
   //view course details -> need identifier
   //edit course details -> need identifier
 
-
-
-
-
-  //admin section unused for now
-
+  //admin section
   // create new course
   app.get('/newcourse', courses.renderNewCourse);
   app.post('/newcourse', courses.submitNewCourse);
 
   app.post('/organizer/sendReminder/:id', auth.requiresOrganizer, organizer.sendReminders);
+
+  app.get('/', (req, res) => {res.redirect('/main')});
 
 }
