@@ -155,12 +155,13 @@ module.exports = {
 					cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}</a>`,
 			};
 			console.log(msg);
+			// will go to catch on failure
 			console.log(await sgMail.send(msg));
 		}
-		res.send("Ok");    
+		res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'Email sent successfully!', target: 'the course view'});  
 		} catch(err) {
 			console.log(err);
-			res.send("Error sending email");
+			res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'ERROR: EMAIL NOT SENT!', target: 'the course view'});  
 		}
 	}
 

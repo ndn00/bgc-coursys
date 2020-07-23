@@ -52,6 +52,6 @@ module.exports = (app, passport, database) => {
   app.get('/newcourse', courses.renderNewCourse);
   app.post('/newcourse', courses.submitNewCourse);
 
-  app.get('/organizer/sendReminder/:id', auth.requiresOrganizer, organizer.sendReminders);
+  app.post('/organizer/sendReminder/:id', auth.requiresOrganizer, organizer.sendReminders);
 
 }
