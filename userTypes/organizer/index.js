@@ -113,6 +113,7 @@ module.exports = {
 		}
 		for (let l = 0; l < newApproved.length; l++) {
 			approvedParams.push(newApproved[l]);
+		}
 
 		let deletedUsersString = deletedUsers.map((number) => {
 			console.log(number.toString(10));
@@ -126,7 +127,7 @@ module.exports = {
 			disableParms.push(newDisable[n]);
 		}
 		for (let o = 1; o <= deletedUsers.length; o++) {
-			deletedParams.push('$' + l);
+			deletedParams.push('$' + o);
 		}
 		let newAttendeeQuery = "UPDATE users SET type='attendee' WHERE id IN (" + attendeeParams.join(',') + ");"
 		let newOrganizerQuery = "UPDATE users SET type='organizer' WHERE id IN (" + organizerParams.join(',') + ");"
