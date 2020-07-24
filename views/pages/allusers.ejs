@@ -17,7 +17,8 @@
     <div class="container">
       <h2>Modify User Status</h2>
       <form id="modifyUser" action="/organizer/allusers" method="post">
-        <input type="number" name="tableSize" value="<%= userData.length %>" hidden>
+        <input type="number" name="minID" value="<%= minID %>" hidden>
+        <input type="number" name="maxID" value="<%= maxID %>" hidden>
 
         <table class="table table-striped">
           <thead>
@@ -25,6 +26,7 @@
               <th scope='col'>ID</th>
               <th scope='col'>Email</th>
               <th scope='col'>Status</th>
+              <th scope='col'>Delete User</th>
             </tr>
           </thead>
           <tbody>
@@ -61,12 +63,17 @@
                   </div>
                 <% } %>
               </td>
+              <td>
+                <div class="text-center">
+                  <input type="checkbox" name=<%= "delete" + user.id %> value="deletePls">
+                </div>
+              </td>
             </tr>
             <% } %>
           <% }); %>
           </tbody>
         </table>
-
+        <p>Note: Once user data is deleted, it cannot be recovered.</p>
         <% if (userData.length > 0) { %>
           <input type="submit" class="btn btn-dark" name="updateUserData" value="Update User Data">
         <% } else { %>

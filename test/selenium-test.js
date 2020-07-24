@@ -390,13 +390,58 @@ describe('login-interactions', function() {
     });
     //course access
     describe('course-access', function() {
-      it('Users must be logged in to access a course path');
-      it('Accessing a non-existent course will return a status code')
-      it('For a valid course, the title must show up');
-      it('For a valid course, the topic must be present');
-      it("For a valid course, the location must be present");
-      it("For a valid course, the maximum number of seats must be present");
-      it("For a valid course, the registration deadline must be present");
+      //it('Users must be logged in to access a course path');
+      //it('Accessing a non-existent course will return a status code')
+      it('For a valid course, the title must show up', async function() {
+        await driver.get(loginURL);
+        await driver.sleep(1000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+
+        await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/4');
+        const title = driver.findElement(By.class('h1')).getText();
+        await driver.get(logoutURL);
+        expect(title).to.be.a('string').that.is.not.empty;
+
+      });
+      it('For a valid course, the topic must be present', async function() {
+        await driver.get(loginURL);
+        await driver.sleep(1000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+
+        await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/4');
+        const topic = await driver.findElement(By.id('topic')).getText();
+        await driver.get(logoutURL);
+        expect(topic).to.be.a('string').that.is.not.empty;
+
+      });
+      it("For a valid course, the location must be present", async function() {
+        await driver.get(loginURL);
+        await driver.sleep(1000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+
+        await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/4');
+        const location = await driver.findElement(By.id('location')).getText();
+        await driver.get(logoutURL);
+        expect(location).to.be.a('string').that.is.not.empty;
+      });
+      it("For a valid course, the maximum number of seats must be present", async function() {
+        await driver.get(loginURL);
+        await driver.sleep(1000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+
+        await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/4');
+        const seats = await driver.findElement(By.id('seatNum')).getText();
+        await driver.get(logoutURL);
+        expect(seats).to.be.a('string').that.is.not.empty;
+      });
       it("For a valid course, there should be at least one session with indicated date, start, and end times")
     });
 
