@@ -133,6 +133,7 @@ module.exports = {
 
   },
   enrollCourse: (req, res) => {
+    //TODO: check whether user is already enrolled to prevent double enrollment
     let courseID = parseInt(req.params.id, 10);
     let userID = req.user.id;
     let userPosition = 0;
@@ -174,9 +175,21 @@ module.exports = {
     database.query(insertCourseEnrollment, [courseID, userID, userPosition], (dbErr, dbRes) => {
       if (dbErr) {
         console.log(dbErr);
-        return res.json("Database error - enrolling course");
+        let errorBlock = {
+          redirect: '/main',
+          message: 'You are already enrolled (or there is some nasty primary key desync).',
+          target: 'the main page'
+        };
+        return res.render("pages/redirect", errorBlock);
       } else {
-        res.redirect('/courses/' + courseID);
+        //redirect to message + main
+        //res.redirect('/courses/' + courseID);
+        let backToMain = {
+          redirect: '/main',
+          message: 'Course enrolled successfully!',
+          target: 'the main page'
+        };
+        res.render('pages/redirect', backToMain);
       }
     });
   },
