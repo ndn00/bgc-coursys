@@ -69,20 +69,20 @@
                 <!-- Based on the user status, have a different radio button checked by default-->
                 <% if (user.approved === true) {%>
                 <div>
-                  <input type="radio" name=<%= "approved" + user.id %> value="true" checked>
-                  <label for="true">Activated</label>
+                  <input type="radio" name=<%= "approved" + user.id %> id=<%= "approvedTrue" + user.id %> value="true" checked>
+                  <label for="true">Activate</label>
                 </div>
                 <div>
-                  <input type="radio" name=<%= "approved" + user.id %>  value="false">
-                  <label for="false">Not Activated</label>
+                  <input type="radio" name=<%= "approved" + user.id %> id=<%= "approvedFalse" + user.id %> value="false">
+                  <label for="false">Disable</label>
                 </div>
                 <% } else { %>
                   <div>
-                    <input type="radio" name=<%= "approved" + user.id %> value="true">
+                    <input type="radio" name=<%= "approved" + user.id %> id=<%= "approvedTrue" + user.id %> value="true">
                     <label for="true">Activated</label>
                   </div>
                   <div>
-                    <input type="radio" name=<%= "approved" + user.id %>  value="false" checked>
+                    <input type="radio" name=<%= "approved" + user.id %> id=<%= "approvedFalse" + user.id %> value="false" checked>
                     <label for="false">Not Activated</label>
                   </div>
                 <% } %>
