@@ -208,7 +208,7 @@ module.exports = {
 		}
 
 		if (newAttendees.length > 0) {
-			database.query(newAttendeeQuery, (dbErr, dbRes) => {
+			database.query(newAttendeeQuery, newAttendees, (dbErr, dbRes) => {
 				if (dbErr) {
 					errors.push("Database error - could not update new attendees");
 				}
@@ -216,7 +216,7 @@ module.exports = {
 		}
 
 		if (newOrganizers.length > 0) {
-			database.query(newOrganizerQuery, (dbErr, dbRes) => {
+			database.query(newOrganizerQuery, newOrganizers, (dbErr, dbRes) => {
 				if (dbErr) {
 					errors.push("Database error - could not update new organizers");
 				}
@@ -224,7 +224,7 @@ module.exports = {
 		}
 
 		if (newDisable.length > 0) {
-			database.query(newDisableQuery, (dbErr, dbRes) => {
+			database.query(newDisableQuery, newDisable,  (dbErr, dbRes) => {
 				if (dbErr) {
 					console.log(dbErr);
 					errors.push("Database error - could not update new disabled");
