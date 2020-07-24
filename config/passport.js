@@ -14,7 +14,7 @@ module.exports = (passport, database) => {
     database.query('SELECT id, email, password, type, approved FROM users WHERE email=$1;', [email], (err, dbres) => {
       if (err) {
         console.log("Database error: login-related");
-        return callback(error);
+        return callback(err);
       }
       if (dbres.rows.length > 0) {
         const resultRow = dbres.rows[0];

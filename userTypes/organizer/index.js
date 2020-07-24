@@ -94,17 +94,15 @@ module.exports = {
 				else {
 					newOrganizers.push(i);
 				}
-				//update database, set type to organizer for users
-				//update database, set type to attendee for users
-				if (request.body["approved" + i] === 'true') {
-					newApproved.push(i);
-				}
-				else {
-					newDisable.push(i);
-				}
 			}
-
+			if (request.body["approved" + i] === 'true') {
+					newApproved.push(i);
+			} else {
+					newDisable.push(i);
+			}
 		}
+
+
 		for (let j = 0; j < newAttendees.length; j++) {
 			attendeeParams.push(newAttendees[j]);
 		}
@@ -176,11 +174,11 @@ module.exports = {
 							from: 'mla283@sfu.ca',
 							subject: `BGC Coursys: Account Approved`,
 							text: `Congratulations your account has been approved!
-									
+
 									Login at cmpt276-bgc-coursys.herokuapp.com/`,
 							html: `Congratulations your account has been approved!
 									<br><br>
-									To view more information please visit 
+									To view more information please visit
 									<a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/">
 									cmpt276-bgc-coursys.herokuapp.com/</a>`,
 							};
@@ -192,9 +190,9 @@ module.exports = {
 				}
 			}
 		});
-		
-		
-		
+
+
+
 		if (deletedUsers.length > 0) {
 			database.query(deletedQuery, deletedUsers, (dbErr, dbRes) => {
 				if (dbErr) {
@@ -207,6 +205,7 @@ module.exports = {
 				});
 			});
 		}
+
 		if (newAttendees.length > 0) {
 			database.query(newAttendeeQuery, (dbErr, dbRes) => {
 				if (dbErr) {
@@ -214,6 +213,7 @@ module.exports = {
 				}
 			});
 		}
+
 		if (newOrganizers.length > 0) {
 			database.query(newOrganizerQuery, (dbErr, dbRes) => {
 				if (dbErr) {
@@ -221,7 +221,7 @@ module.exports = {
 				}
 			});
 		}
-		
+
 		if (newDisable.length > 0) {
 			database.query(newDisableQuery, (dbErr, dbRes) => {
 				if (dbErr) {
@@ -230,6 +230,7 @@ module.exports = {
 				}
 			});
 		}
+
 		if (errors.length > 0) {
 			return result.json(errors);
 		}
@@ -246,13 +247,13 @@ module.exports = {
 		// https://github.com/sendgrid/sendgrid-nodejs
 		sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 		try {
-			let getEmails = 
+			let getEmails =
 			`SELECT u.email FROM users u, enrollment e, courses c
 			WHERE c.id=e.course_id and e.user_id=u.id and c.id=${req.params.id};`;
 			let getCourseInfo =
 			`SELECT * FROM courses WHERE id=${req.params.id};`;
 			let getNextSession =
-			`SELECT * FROM course_sessions WHERE course_id=${req.params.id} AND 
+			`SELECT * FROM course_sessions WHERE course_id=${req.params.id} AND
 			session_start >= CURRENT_DATE ORDER BY session_start ASC;`
 			let emails = await database.query(getEmails);
 			let courseInfo = await database.query(getCourseInfo);
@@ -261,7 +262,7 @@ module.exports = {
 			nextDate = nextDate.rows[0].session_start;
 			console.log(emails);
 			if (emails.rowCount === 0) {
-				res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'No users enrolled, no emails sent.', target: 'the course view'});  
+				res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'No users enrolled, no emails sent.', target: 'the course view'});
 			}
 			for (row of emails.rows) {
 				if (courseInfo === undefined) {
@@ -271,15 +272,15 @@ module.exports = {
 				to: row.email,
 				from: 'mla283@sfu.ca',
 				subject: `Course Reminder: ${courseInfo[0].course_name}`,
-				text: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} 
+				text: `This is a reminder that you are enrolled in ${courseInfo[0].course_name}
 						which is scheduled for ${nextDate} in ${courseInfo[0].location}.
-						
+
 						To view more information please visit cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}`,
-				html: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} which is scheduled for 
+				html: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} which is scheduled for
 						<br>
 						<strong>${nextDate}</strong> in <strong>${courseInfo[0].location}</strong>.
 						<br><br>
-						To view more information please visit 
+						To view more information please visit
 						<a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}">
 						cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}</a>`,
 				};
