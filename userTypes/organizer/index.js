@@ -103,11 +103,11 @@ module.exports = {
 		}
 
 
-		for (let j = 0; j < newAttendees.length; j++) {
-			attendeeParams.push(newAttendees[j]);
+		for (let j = 1; j <= newAttendees.length; j++) {
+			attendeeParams.push('$' + j);
 		}
-		for (let k = 0; k < newOrganizers.length; k++) {
-			organizerParams.push(newOrganizers[k]);
+		for (let k = 1; k <= newOrganizers.length; k++) {
+			organizerParams.push('$' + k);
 		}
 		for (let l = 0; l < newApproved.length; l++) {
 			approvedParams.push(newApproved[l]);
@@ -121,8 +121,8 @@ module.exports = {
 		for (let m = 1; m <= newAttendees.length; m++) {
 			attendeeParams.push('$' + m);
 		}
-		for (let n = 0; n < newDisable.length; n++) {
-			disableParms.push(newDisable[n]);
+		for (let n = 1; n <= newDisable.length; n++) {
+			disableParms.push('$' + n);
 		}
 		for (let o = 1; o <= deletedUsers.length; o++) {
 			deletedParams.push('$' + o);
