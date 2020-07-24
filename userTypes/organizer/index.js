@@ -50,7 +50,7 @@ module.exports = {
 	//as of now, organizer accounts must be manually created
 	allusers: (request, result) => {
 		//access database
-		database.query('SELECT id, email, type FROM users;', (err, dbRes) => {
+		database.query('SELECT id, email, type, approved FROM users;', (err, dbRes) => {
 			if (err) {
 				return result.json("Could not retrieve database values to show all users");
 			}
@@ -73,6 +73,10 @@ module.exports = {
 		let attendeeParams = [];
 		let newOrganizers = [];
 		let organizerParams = [];
+		let newApproved = [];
+		let approvedParams = [];
+		let newDisable = [];
+		let disableParms = [];
 		let deletedUsers = [];
 		let deletedParams = [];
 
@@ -92,26 +96,44 @@ module.exports = {
 				}
 				//update database, set type to organizer for users
 				//update database, set type to attendee for users
+				if (request.body["approved" + i] === 'true') {
+					newApproved.push(i);
+				}
+				else {
+					newDisable.push(i);
+				}
 			}
 
 		}
+		for (let j = 0; j < newAttendees.length; j++) {
+			attendeeParams.push(newAttendees[j]);
+		}
+		for (let k = 0; k < newOrganizers.length; k++) {
+			organizerParams.push(newOrganizers[k]);
+		}
+		for (let l = 0; l < newApproved.length; l++) {
+			approvedParams.push(newApproved[l]);
 
 		let deletedUsersString = deletedUsers.map((number) => {
 			console.log(number.toString(10));
 			return number.toString(10);
 		});
 
-		for (let j = 1; j <= newAttendees.length; j++) {
-			attendeeParams.push('$' + j);
+		for (let m = 1; m <= newAttendees.length; m++) {
+			attendeeParams.push('$' + m);
 		}
-		for (let k = 1; k <= newOrganizers.length; k++) {
-			organizerParams.push('$' + k);
+		for (let n = 0; n < newDisable.length; n++) {
+			disableParms.push(newDisable[n]);
 		}
-		for (let l = 1; l <= deletedUsers.length; l++) {
+		for (let o = 1; o <= deletedUsers.length; o++) {
 			deletedParams.push('$' + l);
 		}
 		let newAttendeeQuery = "UPDATE users SET type='attendee' WHERE id IN (" + attendeeParams.join(',') + ");"
 		let newOrganizerQuery = "UPDATE users SET type='organizer' WHERE id IN (" + organizerParams.join(',') + ");"
+		let newApprovedQuery = "UPDATE users SET approved=true WHERE id IN (" + approvedParams.join(',') + ");"
+		let newDisableQuery = "UPDATE users SET approved=false WHERE id IN (" + disableParms.join(',') + ");"
+		// List of users to email, only those that weren't approved before
+		let toEmailQuery = `SELECT * FROM USERS WHERE id IN (${approvedParams.join(',')}) AND approved = FALSE;`;
 		let deletedQuery = "DELETE FROM users WHERE id IN (" + deletedParams.join(',') + ");"
 		let deleteSessionsQuery = "DELETE FROM session WHERE sess::json#>>'{passport, user}' IN (" + deletedParams.join(',') + ");"
 		/*
@@ -119,12 +141,59 @@ module.exports = {
 		console.log(newAttendeeQuery);
 		console.log(newOrganizers);
 		console.log(newOrganizerQuery);
+		console.log(newApproved);
+		console.log(approvedParams);
+		console.log(newApprovedQuery);
+		console.log(newDisable);
+		console.log(newDisableQuery);
+		console.log(toEmailQuery);
 		console.log(deletedUsers);
 		console.log(deletedUsersString);
 		console.log(deletedQuery);
 		console.log(deleteSessionsQuery);
 		*/
+
 		let errors = [];
+		database.query(toEmailQuery, async(dbErr, dbRes) => {
+			if (dbErr) {
+				errors.push("Database error - could not get list of users to email");
+			} else {
+				let usersToEmail = dbRes.rows
+				console.log(usersToEmail);
+				if (newApproved.length > 0) {
+					database.query(newApprovedQuery, (dbErr, dbRes) => {
+						if (dbErr) {
+							errors.push("Database error - could not update new approved");
+						}
+					});
+				}
+				try {
+					for (user of usersToEmail){
+						sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+						const msg = {
+							to: user.email,
+							from: 'mla283@sfu.ca',
+							subject: `BGC Coursys: Account Approved`,
+							text: `Congratulations your account has been approved!
+									
+									Login at cmpt276-bgc-coursys.herokuapp.com/`,
+							html: `Congratulations your account has been approved!
+									<br><br>
+									To view more information please visit 
+									<a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/">
+									cmpt276-bgc-coursys.herokuapp.com/</a>`,
+							};
+						console.log(user.email);
+						console.log(await sgMail.send(msg));
+					}
+				} catch(err) {
+					errors.push("Email error - could not send emails to newly approved");
+				}
+			}
+		});
+		
+		
+		
 		if (deletedUsers.length > 0) {
 			database.query(deletedQuery, deletedUsers, (dbErr, dbRes) => {
 				if (dbErr) {
@@ -138,16 +207,25 @@ module.exports = {
 			});
 		}
 		if (newAttendees.length > 0) {
-			database.query(newAttendeeQuery, newAttendees, (dbErr, dbRes) => {
+			database.query(newAttendeeQuery, (dbErr, dbRes) => {
 				if (dbErr) {
 					errors.push("Database error - could not update new attendees");
 				}
 			});
 		}
 		if (newOrganizers.length > 0) {
-			database.query(newOrganizerQuery, newOrganizers, (dbErr, dbRes) => {
+			database.query(newOrganizerQuery, (dbErr, dbRes) => {
 				if (dbErr) {
 					errors.push("Database error - could not update new organizers");
+				}
+			});
+		}
+		
+		if (newDisable.length > 0) {
+			database.query(newDisableQuery, (dbErr, dbRes) => {
+				if (dbErr) {
+					console.log(dbErr);
+					errors.push("Database error - could not update new disabled");
 				}
 			});
 		}
@@ -167,46 +245,46 @@ module.exports = {
 		// https://github.com/sendgrid/sendgrid-nodejs
 		sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 		try {
-		let getEmails =
-		`SELECT u.email FROM users u, enrollment e, courses c
-		WHERE c.id=e.course_id and e.user_id=u.id and c.id=${req.params.id};`;
-		let getCourseInfo =
-		`SELECT * FROM courses WHERE id=${req.params.id};`;
-		let getNextSession =
-		`SELECT * FROM course_sessions WHERE course_id=${req.params.id} AND
-		session_start >= CURRENT_DATE ORDER BY session_start ASC;`
-		let emails = await database.query(getEmails);
-		let courseInfo = await database.query(getCourseInfo);
-		let nextDate = await database.query(getNextSession);
-		courseInfo = courseInfo.rows;
-		nextDate = nextDate.rows[0].session_start;
-		console.log(emails);
-		if (emails.rowCount === 0) {
-			res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'No users enrolled, no emails sent.', target: 'the course view'});
-		}
-		for (row of emails.rows) {
-			if (courseInfo === undefined) {
-			break;
+			let getEmails = 
+			`SELECT u.email FROM users u, enrollment e, courses c
+			WHERE c.id=e.course_id and e.user_id=u.id and c.id=${req.params.id};`;
+			let getCourseInfo =
+			`SELECT * FROM courses WHERE id=${req.params.id};`;
+			let getNextSession =
+			`SELECT * FROM course_sessions WHERE course_id=${req.params.id} AND 
+			session_start >= CURRENT_DATE ORDER BY session_start ASC;`
+			let emails = await database.query(getEmails);
+			let courseInfo = await database.query(getCourseInfo);
+			let nextDate = await database.query(getNextSession);
+			courseInfo = courseInfo.rows;
+			nextDate = nextDate.rows[0].session_start;
+			console.log(emails);
+			if (emails.rowCount === 0) {
+				res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'No users enrolled, no emails sent.', target: 'the course view'});  
 			}
-			const msg = {
-			to: row.email,
-			from: 'mla283@sfu.ca',
-			subject: `Course Reminder: ${courseInfo[0].course_name}`,
-			text: `This is a reminder that you are enrolled in ${courseInfo[0].course_name}
-					which is scheduled for ${nextDate} in ${courseInfo[0].location}.
-
-					To view more information please visit cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}`,
-			html: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} which is scheduled for
-					<br>
-					<strong>${nextDate}</strong> in <strong>${courseInfo[0].location}</strong>.
-					<br><br>
-					To view more information please visit
-					<a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}">
-					cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}</a>`,
-			};
-			console.log(msg);
-			// will go to catch on failure
-			console.log(await sgMail.send(msg));
+			for (row of emails.rows) {
+				if (courseInfo === undefined) {
+				break;
+				}
+				const msg = {
+				to: row.email,
+				from: 'mla283@sfu.ca',
+				subject: `Course Reminder: ${courseInfo[0].course_name}`,
+				text: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} 
+						which is scheduled for ${nextDate} in ${courseInfo[0].location}.
+						
+						To view more information please visit cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}`,
+				html: `This is a reminder that you are enrolled in ${courseInfo[0].course_name} which is scheduled for 
+						<br>
+						<strong>${nextDate}</strong> in <strong>${courseInfo[0].location}</strong>.
+						<br><br>
+						To view more information please visit 
+						<a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}">
+						cmpt276-bgc-coursys.herokuapp.com/courses/${courseInfo[0].id}</a>`,
+				};
+				console.log(msg);
+				// will go to catch on failure
+				console.log(await sgMail.send(msg));
 		}
 		res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'Email sent successfully!', target: 'the course view'});
 		} catch(err) {

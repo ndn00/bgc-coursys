@@ -49,6 +49,4 @@ module.exports = (app, passport, database) => {
 
   app.post('/organizer/sendReminder/:id', auth.requiresOrganizer, organizer.sendReminders);
 
-  app.get('/', (req, res) => {res.redirect('/main')});
-
 }
