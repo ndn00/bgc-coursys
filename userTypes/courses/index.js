@@ -10,7 +10,17 @@ const database = require('../../database');
 module.exports = {
   //display login
   renderNewCourse: (request, result) => {
-    result.render('pages/newCourse');
+    result.render('pages/newCourse', {
+      id: "",
+      title: "",
+      topic: "",
+      location: "",
+      description: "",
+      sessionNum: "",
+      sessions: [{ name: "", start: "", end: "", date: "" }],
+      deadline: "",
+      seats: "",
+    });
   },
 
   submitNewCourse: (req, res) => {
@@ -45,13 +55,14 @@ module.exports = {
         let insertSession = [];
 
         //construct query
-        let insertSessionQuery = 'INSERT INTO course_sessions (course_id, session_start, session_end) VALUES\n';
+        let insertSessionQuery = 'INSERT INTO course_sessions (course_id, session_start, session_end, session_name) VALUES\n';
         for (let i = 1; i <= numSessions; i++) {
           insertSessionQuery += '(';
           insertSession.push(dbRes.rows[0].id);
           insertSession.push(req.body['sessionDate' + i] + ' ' + req.body['startTime' + i]);
           insertSession.push(req.body['sessionDate' + i] + ' ' + req.body['endTime' + i]);
-          insertSessionQuery += `$${(i - 1) * 3 + 1}, $${(i - 1) * 3 + 2}, $${(i - 1) * 3 + 3})`
+          insertSession.push(req.body['sessionName' + i]);
+          insertSessionQuery += `$${(i - 1) * 4 + 1}, $${(i - 1) * 4 + 2}, $${(i - 1) * 4 + 3}, $${(i - 1) * 4 + 4})`
           if (i < numSessions) {
             insertSessionQuery += ',\n';
           }
@@ -173,7 +184,7 @@ module.exports = {
     let courseID = parseInt(req.params.id, 10);
     let getCourseDetails = `
     SELECT courses.course_name, courses.topic, courses.location, courses.sessions, courses.seat_capacity,
-    courses.description, courses.course_deadline, course_sessions.session_start, course_sessions.session_end
+    courses.description, courses.course_deadline, course_sessions.session_start, course_sessions.session_end, course_sessions.session_name
     FROM courses, course_sessions
     WHERE courses.id = course_sessions.course_id
     AND courses.id=$1;
@@ -195,6 +206,7 @@ module.exports = {
             date: startSess.toISOString().split('T')[0],
             start: startSess.toTimeString().match(timeFormat)[0],
             end: endSess.toTimeString().match(timeFormat)[0],
+            name: oldRow.session_name,
           };
         });
 
@@ -261,19 +273,22 @@ module.exports = {
         let insertSession = [];
 
         //construct query
-        let insertSessionQuery = 'INSERT INTO course_sessions (course_id, session_start, session_end) VALUES\n';
+        let insertSessionQuery = 'INSERT INTO course_sessions (course_id, session_start, session_end, session_name) VALUES\n';
         for (let i = 1; i <= numSessions; i++) {
           insertSessionQuery += '(';
           insertSession.push(courseID);
           insertSession.push(req.body['sessionDate' + i] + ' ' + req.body['startTime' + i]);
           insertSession.push(req.body['sessionDate' + i] + ' ' + req.body['endTime' + i]);
-          insertSessionQuery += `$${(i - 1) * 3 + 1}, $${(i - 1) * 3 + 2}, $${(i - 1) * 3 + 3})`
+          insertSession.push(req.body['sessionName' + i]);
+          insertSessionQuery += `$${(i - 1) * 4 + 1}, $${(i - 1) * 4 + 2}, $${(i - 1) * 4 + 3}, $${(i - 1) * 4 + 4})`
           if (i < numSessions) {
             insertSessionQuery += ',\n';
           }
 
         }
         insertSessionQuery += ';'
+        console.log(insertSessionQuery);
+        console.log(insertSession);
         database.query(insertSessionQuery, insertSession, (dbErr2, dbRes2) => {
           if (dbErr2) {
             return res.json("Database error - inserting new session records");
