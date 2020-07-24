@@ -17,18 +17,18 @@
         <h1><%= title %></h1>
       </div>
       <div class="row pl-4 pb-2">
-        <h3><%= topic %></h3>
+        <h3 id="topic"><%= topic %></h3>
       </div>
       <hr class="pb-3"/>
       <div class="row pl-4 pb-2">
-        <h3>Location: <%= location %></h3>
+        <h3 id="location">Location: <%= location %></h3>
       </div>
       <div class="row pl-4 pb-2">
-        <p><%= description %></p>
+        <p id="description"><%= description %></p>
       </div>
       <hr class="pb-2"/>
       <div class="row pl-4 pb-1 pt-3">
-        <h3>Sessions</h3>
+        <h3 id="sessionTitle">Sessions</h3>
       </div>
       <div class="row">
         <table class="table table-striped">
@@ -51,7 +51,7 @@
         </table>
       </div>
       <div class="row pl-4 pb-5">
-        <h4>Number of seats: <%= seats %></h4>
+        <h4 id="seatNum">Number of seats: <%= seats %></h4>
       </div>
       <div class="row">
         <form action="/courses/register/<%= id %>" method="POST">

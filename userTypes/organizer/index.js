@@ -55,13 +55,20 @@ module.exports = {
 				return result.json("Could not retrieve database values to show all users");
 			}
 			//pass in data to render
-			return result.render('pages/allusers', { userData: dbRes.rows, curUser: request.user.email });
+			let idArray = dbRes.rows.map((item) => {
+				return parseInt(item.id, 10);
+			});
+			let minID = Math.min(...idArray);
+			let maxID = Math.max(...idArray);
+
+			return result.render('pages/allusers', { userData: dbRes.rows, curUser: request.user.email, minID: minID, maxID: maxID });
 		});
 	},
 
 	updateUsers: async (request, result) => {
 		//updates all users whose status has changed
-		let tableSize = parseInt(request.body.tableSize, 10);
+		let minID = parseInt(request.body.minID, 10);
+		let maxID = parseInt(request.body.maxID, 10);
 		let newAttendees = [];
 		let attendeeParams = [];
 		let newOrganizers = [];
@@ -70,11 +77,18 @@ module.exports = {
 		let approvedParams = [];
 		let newDisable = [];
 		let disableParms = [];
+		let deletedUsers = [];
+		let deletedParams = [];
 
+		//Needs to start from
 
-		for (let i = 1; i <= tableSize; i++) {
+		for (let i = minID; i <= maxID; i++) {
 			if (request.body["id" + i]) {
-				if (request.body["status" + i] === 'attendee') {
+				//delete user
+				if (request.body['delete' + i]) {
+					deletedUsers.push(i);
+				}
+				else if (request.body["status" + i] === 'attendee') {
 					newAttendees.push(i);
 				}
 				else {
@@ -99,9 +113,20 @@ module.exports = {
 		}
 		for (let l = 0; l < newApproved.length; l++) {
 			approvedParams.push(newApproved[l]);
+
+		let deletedUsersString = deletedUsers.map((number) => {
+			console.log(number.toString(10));
+			return number.toString(10);
+		});
+
+		for (let m = 1; m <= newAttendees.length; m++) {
+			attendeeParams.push('$' + m);
 		}
-		for (let m = 0; m < newDisable.length; m++) {
-			disableParms.push(newDisable[m]);
+		for (let n = 0; n < newDisable.length; n++) {
+			disableParms.push(newDisable[n]);
+		}
+		for (let o = 1; o <= deletedUsers.length; o++) {
+			deletedParams.push('$' + l);
 		}
 		let newAttendeeQuery = "UPDATE users SET type='attendee' WHERE id IN (" + attendeeParams.join(',') + ");"
 		let newOrganizerQuery = "UPDATE users SET type='organizer' WHERE id IN (" + organizerParams.join(',') + ");"
@@ -109,6 +134,9 @@ module.exports = {
 		let newDisableQuery = "UPDATE users SET approved=false WHERE id IN (" + disableParms.join(',') + ");"
 		// List of users to email, only those that weren't approved before
 		let toEmailQuery = `SELECT * FROM USERS WHERE id IN (${approvedParams.join(',')}) AND approved = FALSE;`;
+		let deletedQuery = "DELETE FROM users WHERE id IN (" + deletedParams.join(',') + ");"
+		let deleteSessionsQuery = "DELETE FROM session WHERE sess::json#>>'{passport, user}' IN (" + deletedParams.join(',') + ");"
+		/*
 		console.log(newAttendees);
 		console.log(newAttendeeQuery);
 		console.log(newOrganizers);
@@ -119,19 +147,23 @@ module.exports = {
 		console.log(newDisable);
 		console.log(newDisableQuery);
 		console.log(toEmailQuery);
-		
+		console.log(deletedUsers);
+		console.log(deletedUsersString);
+		console.log(deletedQuery);
+		console.log(deleteSessionsQuery);
+		*/
 
-		
+		let errors = [];
 		database.query(toEmailQuery, async(dbErr, dbRes) => {
 			if (dbErr) {
-				return result.send("Database error - could not get list of users to email");
+				errors.push("Database error - could not get list of users to email");
 			} else {
 				let usersToEmail = dbRes.rows
 				console.log(usersToEmail);
 				if (newApproved.length > 0) {
 					database.query(newApprovedQuery, (dbErr, dbRes) => {
 						if (dbErr) {
-							return result.send("Database error - could not update new approved");
+							errors.push("Database error - could not update new approved");
 						}
 					});
 				}
@@ -155,26 +187,36 @@ module.exports = {
 						console.log(await sgMail.send(msg));
 					}
 				} catch(err) {
-					return result.send("Email error - could not send emails to newly approved");
+					errors.push("Email error - could not send emails to newly approved");
 				}
 			}
 		});
 		
 		
-
-
-
+		
+		if (deletedUsers.length > 0) {
+			database.query(deletedQuery, deletedUsers, (dbErr, dbRes) => {
+				if (dbErr) {
+					errors.push("Database error - could not delete users");
+				}
+				database.query(deleteSessionsQuery, deletedUsersString, (dbErr1, dbRes1) => {
+					if (dbErr1) {
+						errors.push("Database error - could not delete sessions");
+					}
+				});
+			});
+		}
 		if (newAttendees.length > 0) {
 			database.query(newAttendeeQuery, (dbErr, dbRes) => {
 				if (dbErr) {
-					return result.send("Database error - could not update new attendees");
+					errors.push("Database error - could not update new attendees");
 				}
 			});
 		}
 		if (newOrganizers.length > 0) {
 			database.query(newOrganizerQuery, (dbErr, dbRes) => {
 				if (dbErr) {
-					return result.send("Database error - could not update new organizers");
+					errors.push("Database error - could not update new organizers");
 				}
 			});
 		}
@@ -183,12 +225,15 @@ module.exports = {
 			database.query(newDisableQuery, (dbErr, dbRes) => {
 				if (dbErr) {
 					console.log(dbErr);
-					return result.send("Database error - could not update new disabled");
+					errors.push("Database error - could not update new disabled");
 				}
 			});
 		}
+		if (errors.length > 0) {
+			return result.json(errors);
+		}
 
-		result.render('pages/redirect', { redirect: '/organizer/main', message: 'User data has been successfully updated!', target: 'the main courses page'});
+		return result.render('pages/redirect', { redirect: '/organizer/main', message: 'User data has been successfully updated!', target: 'the main courses page'});
 	},
 
 	newCourse: (request, result) => {
@@ -197,7 +242,7 @@ module.exports = {
 
 	sendReminders: async (req, res) => {
 		// using Twilio SendGrid's v3 Node.js Library
-		// https://github.com/sendgrid/sendgrid-nodejs  
+		// https://github.com/sendgrid/sendgrid-nodejs
 		sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 		try {
 			let getEmails = 
@@ -241,10 +286,10 @@ module.exports = {
 				// will go to catch on failure
 				console.log(await sgMail.send(msg));
 		}
-		res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'Email sent successfully!', target: 'the course view'});  
+		res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'Email sent successfully!', target: 'the course view'});
 		} catch(err) {
 			console.log(err);
-			res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'ERROR: EMAIL NOT SENT! API failure.', target: 'the course view'});  
+			res.render('pages/redirect', { redirect: `/courses/${req.params.id}`, message: 'ERROR: EMAIL NOT SENT! API failure.', target: 'the course view'});
 		}
 	}
 
