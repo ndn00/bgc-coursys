@@ -518,6 +518,54 @@ describe('login-interactions', function() {
     //   expect(message).to.equal('ERROR: EMAIL NOT SENT! API failure. You will be redirected to the course view.');
     // });
 
+    describe('disable-user', () => {
+      await driver.get(loginURL);
+      await driver.sleep(20000);
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/organizer/allusers');
+
+      await driver.findElement(By.id('approvedFalse3')).click();
+      await driver.findElement(By.name('updateUserData')).click();
+
+      const message = await driver.findElement(By.id('redirectMessage')).getText();
+      await driver.get(logoutURL);
+      expect(message).to.equal('User data has been successfully updated! You will be redirected to the main courses page.');
+      
+      await driver.get(loginURL);
+      await driver.findElement(By.name('uname')).sendKeys('mla283@sfu.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('Password123!');
+      await driver.findElement(By.id('loginSubmit')).click();
+
+      const curURL = await driver.getCurrentUrl();
+      expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/login');
+    });
+
+    describe('approve-user', () => {
+      await driver.get(loginURL);
+      await driver.sleep(20000);
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/organizer/allusers');
+
+      await driver.findElement(By.id('approvedTrue3')).click();
+      await driver.findElement(By.name('updateUserData')).click();
+
+      const message = await driver.findElement(By.id('redirectMessage')).getText();
+      await driver.get(logoutURL);
+      expect(message).to.equal('User data has been successfully updated! You will be redirected to the main courses page.');
+      
+      await driver.get(loginURL);
+      await driver.findElement(By.name('uname')).sendKeys('mla283@sfu.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('Password123!');
+      await driver.findElement(By.id('loginSubmit')).click();
+
+      const curURL = await driver.getCurrentUrl();
+      expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/main');
+      // should check mla283@sfu.ca's inbox to see email received
+    });
 });
 
 
