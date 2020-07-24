@@ -16,7 +16,7 @@ module.exports = {
       topic: "",
       location: "",
       description: "",
-      sessionNum: "",
+      sessionNum: 1,
       sessions: [{ name: "", start: "", end: "", date: "" }],
       deadline: "",
       seats: "",
@@ -287,8 +287,6 @@ module.exports = {
 
         }
         insertSessionQuery += ';'
-        console.log(insertSessionQuery);
-        console.log(insertSession);
         database.query(insertSessionQuery, insertSession, (dbErr2, dbRes2) => {
           if (dbErr2) {
             return res.json("Database error - inserting new session records");
