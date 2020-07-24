@@ -84,7 +84,7 @@ module.exports = {
     //retrieve name, topic, location, max capacity, current seats, description, session times
     let getCourse = `
         SELECT courses.course_name, courses.topic, courses.location, courses.sessions, courses.seat_capacity,
-        courses.description, course_sessions.session_start, course_sessions.session_end
+        courses.description, course_sessions.session_start, course_sessions.session_end, course_sessions.session_name
         FROM courses, course_sessions
         WHERE courses.id = course_sessions.course_id
         AND courses.id=$1;
@@ -110,7 +110,8 @@ module.exports = {
           let newFinish = new Date(oldRow.session_end);
           return {
             session_start: newStart.toLocaleString("en-US", dateFormat),
-            session_end: newFinish.toLocaleString("en-US", dateFormat)
+            session_end: newFinish.toLocaleString("en-US", dateFormat),
+            session_name: oldRow.session_name,
           };
         });
         let inputObject = {
