@@ -51,8 +51,11 @@
             <td><%= item.topic %></td>
             <td><%= item.delivery %></td>
             <td><%= item.time %></td>
-            <!-- <td><%= item.seats %>/<%= item.maxSeats %></td>  SEATS NOT AVAILABLE YET-->
-            <td><%= item.maxSeats %></td>
+            <% if (item.position > item.maxSeats) { %>
+              <td><%= item.seats %>/<%= item.maxSeats %> [<%= (item.position-item.maxSeats) %>]</td>
+            <% } else { %>
+              <td><%= item.seats %>/<%= item.maxSeats %></td>
+            <% } %>
             <td><%= item.status %></td>
             <td>
               <a href=<%= '/courses/' + item.id %>><i class="material-icons md-24">visibility</i></a>

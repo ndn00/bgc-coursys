@@ -168,10 +168,10 @@ module.exports = {
 
     // enrolling user into course
     let insertCourseEnrollment = `
-        INSERT INTO enrollment (course_id, user_id, position) VALUES ($1, $2, $3);
+        INSERT INTO enrollment (course_id, user_id, time) VALUES ($1, $2, CURRENT_TIMESTAMP);
         `;
-    console.log(courseID + " " + userID + " " + userPosition);
-    database.query(insertCourseEnrollment, [courseID, userID, userPosition], (dbErr, dbRes) => {
+    console.log(courseID + " " + userID);
+    database.query(insertCourseEnrollment, [courseID, userID], (dbErr, dbRes) => {
       if (dbErr) {
         console.log(dbErr);
         return res.json("Database error - enrolling course");
