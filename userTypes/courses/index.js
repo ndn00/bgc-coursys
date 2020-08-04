@@ -3,7 +3,7 @@
 //NOTE: this may be split into several sub-files as scope increases
 
 const database = require('../../database');
-
+const sgMail = require('@sendgrid/mail');
 
 
 
@@ -193,7 +193,7 @@ module.exports = {
       }
     });
   },
-  withdrawlCourse: (req, res) => {
+  withdrawlCourse: async (req, res) => {
     let courseID = parseInt(req.params.id, 10);
     let userID = req.user.id;
     let userPosition = 0;
@@ -241,14 +241,33 @@ module.exports = {
       } else {
         if (numEnrolled-1 >= courseCapacity && userPosition <= courseCapacity) {
           // email next user
-          let getNewEnrolled = `SELECT * FROM enrollment WHERE course_id = ${courseID} ORDER BY time ASC;`;
+          let getNewEnrolled = `SELECT e.*, c.course_name, u.email FROM enrollment e, courses c, users u 
+                                WHERE e.course_id = ${courseID} AND e.course_id = c.id AND u.id=e.user_id
+                                ORDER BY e.time ASC;`;
           database.query(getNewEnrolled, (dbErr, dbRes) => {
             if (dbErr) {
               return res.json('Database error - getting next in line');
             } else {
               let nextInLine = dbRes.rows[courseCapacity-1];
-              console.log("next in line is: ");
-              console.log(nextInLine.user_id);
+              sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+              const msg = {
+                to: nextInLine.email,
+                from: 'mla283@sfu.ca',
+                subject: `BGC Coursys: You have been enrolled in the ${nextInLine.course_name}`,
+                text: `You have been moved from the waitlist and enrolled in ${nextInLine.course_name}
+
+                    To view more details visit cmpt276-bgc-coursys.herokuapp.com/courses/${nextInLine.course_id}`,
+                html: `You have been moved from the waitlist and enrolled in ${nextInLine.course_name}
+                    <br><br>
+                    To view more details visit
+                    <a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/courses/${nextInLine.course_id}">
+                    cmpt276-bgc-coursys.herokuapp.com/courses/${nextInLine.course_id}</a>`,
+                };
+              
+              // console.log(nextInLine.email);
+              console.log(sgMail.send(msg));
+
+
             }
           });
         }
