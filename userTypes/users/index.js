@@ -43,13 +43,13 @@ module.exports = {
     GROUP BY id
     ORDER BY course_deadline ASC;
     `;
-  
+
     let queryPosition = `
-    SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN 
-    (SELECT course_id FROM enrollment e WHERE e.user_id = ${request.user.id} AND e2.time<=e.time ORDER BY time ASC)
+    SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN
+    (SELECT course_id FROM enrollment e WHERE e.user_id = $1 AND e2.time<=e.time ORDER BY time ASC)
     GROUP BY course_id;
-    `
-  
+    `;
+
 
     try {
       var data = [];
@@ -58,8 +58,8 @@ module.exports = {
         if (errOutDB) {
           result.send("Error querying db on landing/main");
         } else {
-          console.log(dbRes);
-          database.query(queryPosition, (posError, posRes) => {
+          //console.log(dbRes);
+          database.query(queryPosition, [request.user.id], (posError, posRes) => {
             if (posError) {
               result.send("Error querying position");
             } else {

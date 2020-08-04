@@ -14,6 +14,11 @@ module.exports = {
     if (request.user && request.user.type === 'organizer') {
       return next();
     }
-    result.sendStatus(401);
+    let inputObject = {
+      redirect: '/login',
+      message: 'You need to be logged in as an organizer to access this content.',
+      target: 'the login page'
+    }
+    result.render('pages/redirect', inputObject);
   }
 }

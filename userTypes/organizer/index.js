@@ -9,23 +9,49 @@ module.exports = {
 
 	//dummy data + will need to build links to organizer-only features
 	landing: async (request, result) => {
-        let queryCourse = `
+				/*
+				let queryCourse = `
         SELECT id, course_name, topic, location, sessions,
                 seat_capacity
         FROM courses
         `;
+				*/
+
+				//need to have some mechanism to delete courses
+				let queryCourse = `
+		    SELECT id, course_name, topic, location, sessions, course_deadline,
+		            seat_capacity, count(e.user_id) AS seats
+		    FROM courses LEFT JOIN  enrollment e ON e.course_id = id
+		    GROUP BY id
+		    ORDER BY course_deadline ASC;
+		    `;
+
+		    let queryPosition = `
+		    SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN
+		    (SELECT course_id FROM enrollment e WHERE e.user_id = $1 AND e2.time<=e.time ORDER BY time ASC)
+		    GROUP BY course_id;
+		    `;
+
 
         try {
             var data = [];
-
             database.query(queryCourse, (errOutDB, dbRes) => {
                 if (errOutDB){
-					console.log(errOutDB);
+										console.log(errOutDB);
                     result.send("Error querying db on landing/main");
                 } else {
-                    //var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
-                    for (var row=0; row < dbRes.rows.length; row++) {
+									database.query(queryPosition, [request.user.id], (dbErr1, dbRes1) => {
+										if (dbErr1) {
+											return res.json("Error querying enrollment position on organizer")
+										}
+										var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
+			              var positionMap = dbRes1.rows.reduce((map, obj) => {
+			                map[obj.course_id] = obj.position;
+			                return map;
+			              }, {});
+										for (var row=0; row < dbRes.rows.length; row++) {
                         let startDate = new Date(dbRes.rows[row].start_date);
+												let deadDate = new Date(dbRes.rows[row].course_deadline);
                         data.push(
                             {
 																id: dbRes.rows[row].id,
@@ -33,15 +59,21 @@ module.exports = {
                                 topic: dbRes.rows[row].topic,
                                 delivery: dbRes.rows[row].location,
                                 //time: startDate.toLocaleString("en-US", dateFormat),
+																deadline: deadDate.toLocaleString("en-US", dateFormat),
 																sessions: dbRes.rows[row].sessions,
-                                seats: '?',
+                                seats: dbRes.rows[row].seats,
                                 maxSeats: dbRes.rows[row].seat_capacity,
-                                status: "N/A"
+                                status: (positionMap[dbRes.rows[row].id]) ? (positionMap[dbRes.rows[row].id] > dbRes.rows[row].seat_capacity) ? "Waitlisted" : "Enrolled" : "Open"
                             }
                         );
                     }
                     console.log(data);
                     result.render('pages/orgIndex', { data: data });
+									});
+
+
+										//var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
+
                 }
             });
         } catch (err) {
