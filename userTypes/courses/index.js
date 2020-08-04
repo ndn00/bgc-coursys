@@ -80,6 +80,7 @@ module.exports = {
 
   viewCourse: (req, res) => {
     let courseID = parseInt(req.params.id, 10);
+    let isOrganizer = (req.user.type === 'organizer');
     //retrieve name, topic, location, max capacity, current seats, description, session times
     let getCourse = `
         SELECT courses.course_name, courses.topic, courses.location, courses.sessions, courses.seat_capacity,
@@ -89,57 +90,20 @@ module.exports = {
         AND courses.id=$1;
         `;
     let isEnrolledQuery = `
-        SELECT * FROM enrollment WHERE course_id = ${courseID} AND user_id=${req.user.id};
+        SELECT time FROM enrollment WHERE course_id=$1 AND user_id=$2;
         `
-    database.query(isEnrolledQuery, (dbErr, dbRes) => {
+    database.query(getCourse, [courseID], (dbErr, dbRes) => {
       if (dbErr) {
         return res.json("Database error - viewing courses");
       }
       if (dbRes.rows.length > 0) {
         //only 1 query needed
         //Can be case where there is no course_sessions -> will need to check
-        let dateFormat = {
-          hour: 'numeric',
-          minute: 'numeric',
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        };
-        let formattedDates = dbRes.rows.map((oldRow) => {
-          let newStart = new Date(oldRow.session_start);
-          let newFinish = new Date(oldRow.session_end);
-          return {
-            session_start: newStart.toLocaleString("en-US", dateFormat),
-            session_end: newFinish.toLocaleString("en-US", dateFormat),
-            session_name: oldRow.session_name,
-          };
-        });
-        let inputObject = {
-          isOrganizer: isOrganizer,
-          title: dbRes.rows[0]['course_name'],
-          topic: dbRes.rows[0]['topic'],
-          location: dbRes.rows[0]['location'],
-          description: dbRes.rows[0]['description'],
-          sessionNum: dbRes.rows[0]['sessions'],
-          sessions: formattedDates,
-          seats: dbRes.rows[0]['seat_capacity'],
-          id: courseID
-        }
-
-        return res.render('pages/viewCourse', inputObject);
-      } else {
-        let isEnrolled = dbRes.rows.length > 0  ? true : false;
-        console.log(isEnrolled);
-        console.log(dbRes.rows);
-        let isOrganizer = (req.user.type === 'organizer');
-        database.query(getCourse, [courseID], (dbErr, dbRes) => {
-          if (dbErr) {
-            return res.json("Database error - viewing courses");
-          }
-          if (dbRes.rows.length > 0) {
-            //only 1 query needed
-            //Can be case where there is no course_sessions -> will need to check
+        database.query(isEnrolledQuery, [courseID, req.user.id], (dbErr2, dbRes2) => {
+            if (dbErr2) {
+              return res.json("Database error - checking enrollment")
+            }
+            let isEnrolled = dbRes2.rows.length > 0  ? true : false;
             let dateFormat = {
               hour: 'numeric',
               minute: 'numeric',
@@ -168,15 +132,13 @@ module.exports = {
               seats: dbRes.rows[0]['seat_capacity'],
               id: courseID
             }
-
             return res.render('pages/viewCourse', inputObject);
-          } else {
-            return res.json("Could not retrieve course records");
-          }
-        });
-      }
-    });
-    
+          });
+        } else {
+          return res.json("Could not retrieve course records");
+        }
+      });
+
 
   },
   enrollCourse: (req, res) => {
@@ -240,6 +202,7 @@ module.exports = {
       }
     });
   },
+  
   withdrawlCourse: async (req, res) => {
     let courseID = parseInt(req.params.id, 10);
     let userID = req.user.id;
@@ -288,7 +251,7 @@ module.exports = {
       } else {
         if (numEnrolled-1 >= courseCapacity && userPosition <= courseCapacity) {
           // email next user
-          let getNewEnrolled = `SELECT e.*, c.course_name, u.email FROM enrollment e, courses c, users u 
+          let getNewEnrolled = `SELECT e.*, c.course_name, u.email FROM enrollment e, courses c, users u
                                 WHERE e.course_id = ${courseID} AND e.course_id = c.id AND u.id=e.user_id
                                 ORDER BY e.time ASC;`;
           database.query(getNewEnrolled, (dbErr, dbRes) => {
@@ -310,7 +273,7 @@ module.exports = {
                     <a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/courses/${nextInLine.course_id}">
                     cmpt276-bgc-coursys.herokuapp.com/courses/${nextInLine.course_id}</a>`,
                 };
-              
+
               // console.log(nextInLine.email);
               console.log(sgMail.send(msg));
 
