@@ -7,6 +7,7 @@ const auth = require('./middleware/auth');
 const organizer = require('../userTypes/organizer');
 const users = require('../userTypes/users');
 const courses = require('../userTypes/courses');
+const { widthdrawlCourse } = require('../userTypes/courses');
 
 
 module.exports = (app, passport, database) => {
@@ -36,6 +37,7 @@ module.exports = (app, passport, database) => {
   //add option for change status of members
   app.get('/courses/:id', auth.requiresLogin, courses.viewCourse);
   app.post('/courses/enroll/:id', auth.requiresLogin, courses.enrollCourse);
+  app.post('/courses/withdrawl/:id', auth.requiresLogin, courses.withdrawlCourse);
   app.get('/courses/edit/:id', auth.requiresOrganizer, courses.renderEditCourse);
   app.post('/courses/edit/:id', auth.requiresOrganizer, courses.editCourse);
 

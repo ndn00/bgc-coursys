@@ -52,7 +52,19 @@
       </table>
     </div>
 
-    <hr class="pb-3" />
+  
+  <div class="row">
+    <% if (!isEnrolled) { %>
+      <form action="/courses/enroll/<%= id %>" method="POST">
+        <input type="submit" class="btn btn-dark" value="Enroll">
+      </form>
+    <% } else { %>
+      <form action="/courses/withdrawl/<%= id %>" method="POST">
+        <input type="submit" class="btn btn-dark" value="Withdrawl">
+      </form>
+    <% } %>
+  </div>
+  
 
     <% if (!isOrganizer) { %>
     <div class="row pb-5">

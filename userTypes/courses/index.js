@@ -3,7 +3,7 @@
 //NOTE: this may be split into several sub-files as scope increases
 
 const database = require('../../database');
-
+const sgMail = require('@sendgrid/mail');
 
 
 
@@ -49,7 +49,6 @@ module.exports = {
       if (errOutDB) {
         return result.json("Database error - inserting course");
       } else {
-        console.log(dbRes.rows);
         //gather number of sessions
         let numSessions = parseInt(req.body.sessionTracker, 10);
         let insertSession = [];
@@ -89,8 +88,10 @@ module.exports = {
         WHERE courses.id = course_sessions.course_id
         AND courses.id=$1;
         `;
-    let isOrganizer = (req.user.type === 'organizer');
-    database.query(getCourse, [courseID], (dbErr, dbRes) => {
+    let isEnrolledQuery = `
+        SELECT * FROM enrollment WHERE course_id = ${courseID} AND user_id=${req.user.id};
+        `
+    database.query(isEnrolledQuery, (dbErr, dbRes) => {
       if (dbErr) {
         return res.json("Database error - viewing courses");
       }
@@ -128,9 +129,54 @@ module.exports = {
 
         return res.render('pages/viewCourse', inputObject);
       } else {
-        return res.json("Could not retrieve course records");
+        let isEnrolled = dbRes.rows.length > 0  ? true : false;
+        console.log(isEnrolled);
+        console.log(dbRes.rows);
+        let isOrganizer = (req.user.type === 'organizer');
+        database.query(getCourse, [courseID], (dbErr, dbRes) => {
+          if (dbErr) {
+            return res.json("Database error - viewing courses");
+          }
+          if (dbRes.rows.length > 0) {
+            //only 1 query needed
+            //Can be case where there is no course_sessions -> will need to check
+            let dateFormat = {
+              hour: 'numeric',
+              minute: 'numeric',
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            };
+            let formattedDates = dbRes.rows.map((oldRow) => {
+              let newStart = new Date(oldRow.session_start);
+              let newFinish = new Date(oldRow.session_end);
+              return {
+                session_start: newStart.toLocaleString("en-US", dateFormat),
+                session_end: newFinish.toLocaleString("en-US", dateFormat)
+              };
+            });
+            let inputObject = {
+              isEnrolled: isEnrolled,
+              isOrganizer: isOrganizer,
+              title: dbRes.rows[0]['course_name'],
+              topic: dbRes.rows[0]['topic'],
+              location: dbRes.rows[0]['location'],
+              description: dbRes.rows[0]['description'],
+              sessionNum: dbRes.rows[0]['sessions'],
+              sessions: formattedDates,
+              seats: dbRes.rows[0]['seat_capacity'],
+              id: courseID
+            }
+
+            return res.render('pages/viewCourse', inputObject);
+          } else {
+            return res.json("Could not retrieve course records");
+          }
+        });
       }
     });
+    
 
   },
   enrollCourse: (req, res) => {
@@ -170,10 +216,10 @@ module.exports = {
 
     // enrolling user into course
     let insertCourseEnrollment = `
-        INSERT INTO enrollment (course_id, user_id, position) VALUES ($1, $2, $3);
+        INSERT INTO enrollment (course_id, user_id, time) VALUES ($1, $2, CURRENT_TIMESTAMP);
         `;
-    console.log(courseID + " " + userID + " " + userPosition);
-    database.query(insertCourseEnrollment, [courseID, userID, userPosition], (dbErr, dbRes) => {
+    console.log(courseID + " " + userID);
+    database.query(insertCourseEnrollment, [courseID, userID], (dbErr, dbRes) => {
       if (dbErr) {
         console.log(dbErr);
         let errorBlock = {
@@ -191,6 +237,88 @@ module.exports = {
           target: 'the main page'
         };
         res.render('pages/redirect', backToMain);
+      }
+    });
+  },
+  withdrawlCourse: async (req, res) => {
+    let courseID = parseInt(req.params.id, 10);
+    let userID = req.user.id;
+    let userPosition = 0;
+
+    let courseCapacity = 0;
+    let numEnrolled = 0;
+    // get course capacity
+    let getCourseCapacity = 'SELECT seat_capacity FROM courses WHERE id = $1';
+    database.query(getCourseCapacity, [courseID], (dbErr, dbRes) => {
+      if (dbErr) {
+        return res.json("Database error - retrieving capacity info");
+      }
+      if (dbRes.rows.length > 0) {
+        courseCapacity = dbRes.rows[0].seat_capacity;
+      }
+      else {
+        return res.json("Could not retrieve course records");
+      }
+    });
+    // update user position
+    let getCourseEnrollment = 'SELECT * FROM enrollment WHERE course_id = $1 ORDER BY time ASC';
+    database.query(getCourseEnrollment, [courseID], (dbErr, dbRes) => {
+      if (dbErr) {
+        return res.json("Database error - retrieving enrollment info");
+      }
+      // find max position
+      numEnrolled = dbRes.rows.length;
+      if (numEnrolled >= courseCapacity) {
+        dbRes.rows.forEach((row) => {
+          userPosition = (row.position > userPosition) ? row.position : userPosition;
+        });
+        userPosition++;
+      }
+    });
+
+    // withdrawl user from course
+    let removeCourseEnrollment = `
+        DELETE FROM enrollment WHERE user_id=${req.user.id} AND course_id=${courseID};
+        `;
+    console.log(courseID + " " + userID);
+    database.query(removeCourseEnrollment, (dbErr, dbRes) => {
+      if (dbErr) {
+        console.log(dbErr);
+        return res.json("Database error - withdrawing course");
+      } else {
+        if (numEnrolled-1 >= courseCapacity && userPosition <= courseCapacity) {
+          // email next user
+          let getNewEnrolled = `SELECT e.*, c.course_name, u.email FROM enrollment e, courses c, users u 
+                                WHERE e.course_id = ${courseID} AND e.course_id = c.id AND u.id=e.user_id
+                                ORDER BY e.time ASC;`;
+          database.query(getNewEnrolled, (dbErr, dbRes) => {
+            if (dbErr) {
+              return res.json('Database error - getting next in line');
+            } else {
+              let nextInLine = dbRes.rows[courseCapacity-1];
+              sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+              const msg = {
+                to: nextInLine.email,
+                from: 'mla283@sfu.ca',
+                subject: `BGC Coursys: You have been enrolled in the ${nextInLine.course_name}`,
+                text: `You have been moved from the waitlist and enrolled in ${nextInLine.course_name}
+
+                    To view more details visit cmpt276-bgc-coursys.herokuapp.com/courses/${nextInLine.course_id}`,
+                html: `You have been moved from the waitlist and enrolled in ${nextInLine.course_name}
+                    <br><br>
+                    To view more details visit
+                    <a target="_blank" href="https://cmpt276-bgc-coursys.herokuapp.com/courses/${nextInLine.course_id}">
+                    cmpt276-bgc-coursys.herokuapp.com/courses/${nextInLine.course_id}</a>`,
+                };
+              
+              // console.log(nextInLine.email);
+              console.log(sgMail.send(msg));
+
+
+            }
+          });
+        }
+        res.redirect('/courses/' + courseID);
       }
     });
   },
