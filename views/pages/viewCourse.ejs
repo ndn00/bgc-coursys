@@ -53,13 +53,19 @@
     <h4 id="seatNum">Number of seats: <%= seats %></h4>
   </div>
 
-  <% if (!isOrganizer) { %>
+  
   <div class="row">
-    <form action="/courses/enroll/<%= id %>" method="POST">
-      <input type="submit" class="btn btn-dark" value="Enroll">
-    </form>
+    <% if (!isEnrolled) { %>
+      <form action="/courses/enroll/<%= id %>" method="POST">
+        <input type="submit" class="btn btn-dark" value="Enroll">
+      </form>
+    <% } else { %>
+      <form action="/courses/withdrawl/<%= id %>" method="POST">
+        <input type="submit" class="btn btn-dark" value="Withdrawl">
+      </form>
+    <% } %>
   </div>
-  <% } %>
+  
 
   <% if (isOrganizer) { %>
   <div class="row pl-4 pt-4">

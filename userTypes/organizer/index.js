@@ -20,6 +20,7 @@ module.exports = {
 
             database.query(queryCourse, (errOutDB, dbRes) => {
                 if (errOutDB){
+					console.log(errOutDB);
                     result.send("Error querying db on landing/main");
                 } else {
                     //var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
