@@ -51,6 +51,7 @@ module.exports = {
 			              }, {});
 										for (var row=0; row < dbRes.rows.length; row++) {
                         let startDate = new Date(dbRes.rows[row].start_date);
+												let deadDate = new Date(dbRes.rows[row].course_deadline);
                         data.push(
                             {
 																id: dbRes.rows[row].id,
@@ -58,6 +59,7 @@ module.exports = {
                                 topic: dbRes.rows[row].topic,
                                 delivery: dbRes.rows[row].location,
                                 //time: startDate.toLocaleString("en-US", dateFormat),
+																deadline: deadDate.toLocaleString("en-US", dateFormat),
 																sessions: dbRes.rows[row].sessions,
                                 seats: dbRes.rows[row].seats,
                                 maxSeats: dbRes.rows[row].seat_capacity,
