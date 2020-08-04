@@ -3,7 +3,7 @@
 //NOTE: this may be split into several sub-files as scope increases
 
 const database = require('../../database');
-
+const io = require('../../config/io').io();
 
 
 
@@ -73,6 +73,14 @@ module.exports = {
           if (errOutDB1) {
             return res.json("Database error - inserting course sessions");
           }
+          io.emit('addedcourse', {course: {
+            id: dbRes.rows[0].id,
+            title: insertObject[0],
+            topic: insertObject[1],
+            delivery: insertObject[2],
+            sessions: insertObject[3],
+            maxSeats: insertObject[4],
+          }});
           return res.redirect('/organizer/main');
         });
       }
