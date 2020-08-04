@@ -104,11 +104,11 @@ module.exports = {
 		}
 
 
-		for (let j = 0; j < newAttendees.length; j++) {
-			attendeeParams.push(newAttendees[j]);
+		for (let j = 1; j <= newAttendees.length; j++) {
+			attendeeParams.push('$' + j);
 		}
-		for (let k = 0; k < newOrganizers.length; k++) {
-			organizerParams.push(newOrganizers[k]);
+		for (let k = 1; k <= newOrganizers.length; k++) {
+			organizerParams.push('$' + k);
 		}
 		for (let l = 0; l < newApproved.length; l++) {
 			approvedParams.push(newApproved[l]);
@@ -122,8 +122,8 @@ module.exports = {
 		for (let m = 1; m <= newAttendees.length; m++) {
 			attendeeParams.push('$' + m);
 		}
-		for (let n = 0; n < newDisable.length; n++) {
-			disableParms.push(newDisable[n]);
+		for (let n = 1; n <= newDisable.length; n++) {
+			disableParms.push('$' + n);
 		}
 		for (let o = 1; o <= deletedUsers.length; o++) {
 			deletedParams.push('$' + o);
@@ -169,6 +169,7 @@ module.exports = {
 				}
 				try {
 					for (user of usersToEmail){
+						console.log(process.env.SENDGRID_API_KEY);
 						sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 						const msg = {
 							to: user.email,
@@ -208,7 +209,7 @@ module.exports = {
 		}
 
 		if (newAttendees.length > 0) {
-			database.query(newAttendeeQuery, (dbErr, dbRes) => {
+			database.query(newAttendeeQuery, newAttendees, (dbErr, dbRes) => {
 				if (dbErr) {
 					errors.push("Database error - could not update new attendees");
 				}
@@ -216,7 +217,7 @@ module.exports = {
 		}
 
 		if (newOrganizers.length > 0) {
-			database.query(newOrganizerQuery, (dbErr, dbRes) => {
+			database.query(newOrganizerQuery, newOrganizers, (dbErr, dbRes) => {
 				if (dbErr) {
 					errors.push("Database error - could not update new organizers");
 				}
@@ -224,7 +225,7 @@ module.exports = {
 		}
 
 		if (newDisable.length > 0) {
-			database.query(newDisableQuery, (dbErr, dbRes) => {
+			database.query(newDisableQuery, newDisable,  (dbErr, dbRes) => {
 				if (dbErr) {
 					console.log(dbErr);
 					errors.push("Database error - could not update new disabled");

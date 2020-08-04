@@ -83,7 +83,7 @@ module.exports = {
     //retrieve name, topic, location, max capacity, current seats, description, session times
     let getCourse = `
         SELECT courses.course_name, courses.topic, courses.location, courses.sessions, courses.seat_capacity,
-        courses.description, course_sessions.session_start, course_sessions.session_end
+        courses.description, course_sessions.session_start, course_sessions.session_end, course_sessions.session_name
         FROM courses, course_sessions
         WHERE courses.id = course_sessions.course_id
         AND courses.id=$1;
@@ -93,7 +93,41 @@ module.exports = {
         `
     database.query(isEnrolledQuery, (dbErr, dbRes) => {
       if (dbErr) {
-        return res.json("Database error - getting enrollment status")
+        return res.json("Database error - viewing courses");
+      }
+      if (dbRes.rows.length > 0) {
+        //only 1 query needed
+        //Can be case where there is no course_sessions -> will need to check
+        let dateFormat = {
+          hour: 'numeric',
+          minute: 'numeric',
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        };
+        let formattedDates = dbRes.rows.map((oldRow) => {
+          let newStart = new Date(oldRow.session_start);
+          let newFinish = new Date(oldRow.session_end);
+          return {
+            session_start: newStart.toLocaleString("en-US", dateFormat),
+            session_end: newFinish.toLocaleString("en-US", dateFormat),
+            session_name: oldRow.session_name,
+          };
+        });
+        let inputObject = {
+          isOrganizer: isOrganizer,
+          title: dbRes.rows[0]['course_name'],
+          topic: dbRes.rows[0]['topic'],
+          location: dbRes.rows[0]['location'],
+          description: dbRes.rows[0]['description'],
+          sessionNum: dbRes.rows[0]['sessions'],
+          sessions: formattedDates,
+          seats: dbRes.rows[0]['seat_capacity'],
+          id: courseID
+        }
+
+        return res.render('pages/viewCourse', inputObject);
       } else {
         let isEnrolled = dbRes.rows.length > 0  ? true : false;
         console.log(isEnrolled);
@@ -146,6 +180,7 @@ module.exports = {
 
   },
   enrollCourse: (req, res) => {
+    //TODO: check whether user is already enrolled to prevent double enrollment
     let courseID = parseInt(req.params.id, 10);
     let userID = req.user.id;
     let userPosition = 0;
@@ -187,9 +222,21 @@ module.exports = {
     database.query(insertCourseEnrollment, [courseID, userID], (dbErr, dbRes) => {
       if (dbErr) {
         console.log(dbErr);
-        return res.json("Database error - enrolling course");
+        let errorBlock = {
+          redirect: '/main',
+          message: 'You are already enrolled (or there is some nasty primary key desync).',
+          target: 'the main page'
+        };
+        return res.render("pages/redirect", errorBlock);
       } else {
-        res.redirect('/courses/' + courseID);
+        //redirect to message + main
+        //res.redirect('/courses/' + courseID);
+        let backToMain = {
+          redirect: '/main',
+          message: 'Course enrolled successfully!',
+          target: 'the main page'
+        };
+        res.render('pages/redirect', backToMain);
       }
     });
   },
