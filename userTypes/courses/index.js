@@ -194,7 +194,7 @@ module.exports = {
         //redirect to message + main
         //res.redirect('/courses/' + courseID);
         let backToMain = {
-          redirect: '/main',
+          redirect: req.user.type === 'organizer' ? '/organizer/main' : '/main',
           message: 'Course enrolled successfully!',
           target: 'the main page'
         };
@@ -202,7 +202,7 @@ module.exports = {
       }
     });
   },
-  
+
   withdrawlCourse: async (req, res) => {
     let courseID = parseInt(req.params.id, 10);
     let userID = req.user.id;
