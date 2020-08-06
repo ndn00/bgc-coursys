@@ -1,0 +1,55 @@
+<div class="justify-content-center mb-5">
+  <form class="justify-content-around col-12" action="<%= '/courses/delete/' + id %>" method="post" onSubmit="return confirmDelete()">
+    <div class="row">
+      <label for="delCourse">Warning: Deleting courses will delete all sessions and enrolled/waitlisted users. Deleted courses cannot be recovered.</label>
+    </div>
+    <div class="row">
+      <input type="submit" class="btn btn-danger" name="delCourse" value="Delete Course">
+    </div>
+  </form>
+</div>
+<br>
+<h2>Enrolled users:</h2>
+<div class="row justify-content-center pb-3">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Position</th>
+        <th scope="col">User ID</th>
+        <th scope="col">Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach((item, index) => { %>
+        <tr>
+          <th scope="row"><%= index+1 %></th>
+          <td><%= item.user_id %></td>
+          <td><%= item.email %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% if (waitlistUsers.length > 0) { %>
+<h2>Waitlisted users:</h2>
+<div class="row justify-content-center pb-3">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Position</th>
+        <th scope="col">User ID</th>
+        <th scope="col">Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% waitlistUsers.forEach((item, index) => { %>
+        <tr>
+          <th scope="row"><%= index+1 %></th>
+          <td><%= item.user_id %></td>
+          <td><%= item.email %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>

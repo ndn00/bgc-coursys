@@ -13,15 +13,18 @@
     <div class="row pt-5 justify-content-center pb-5">
       <form id="courseForm" class="justify-content-around col-12" method="POST" action="<%= '/courses/edit/' + id %>"
         onsubmit="return validateForm()">
-        <h2 class="">Edit Course</h2>
+        <h1 class="">Edit Course</h1>
         <%- include ('../partials/courseForm.ejs') %>
 
         <input type="number" id="sessionTracker" name="sessionTracker" value=<%= sessionNum %>>
         <input type="submit" class="btn btn-dark" value="Save">
       </form>
-    </div>
-  </div>
 
+    </div>
+    <% if (editCourse) { %>
+      <%- include ('../partials/editAccessories.ejs') %>
+    <% } %>
+  </div>
 
 </body>
 <script>
@@ -96,6 +99,15 @@
       previousEnd = endDateTime;
     }
     return true;
+  }
+
+  function confirmDelete() {
+    let confirm = window.prompt("To confirm deletion, type the following exactly:\nPlease delete this course.")
+    if (confirm === 'Please delete this course.') {
+      return true;
+    } else {
+      return false;
+    }
   }
   //create new session
   // function newSession() {

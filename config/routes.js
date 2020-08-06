@@ -37,18 +37,19 @@ module.exports = (app, passport, database) => {
   //add option for change status of members
   app.get('/courses/:id', auth.requiresLogin, courses.viewCourse);
   app.post('/courses/enroll/:id', auth.requiresLogin, courses.enrollCourse);
-  app.post('/courses/withdrawl/:id', auth.requiresLogin, courses.withdrawlCourse);
+  app.post('/courses/withdraw/:id', auth.requiresLogin, courses.withdrawCourse);
   app.get('/courses/edit/:id', auth.requiresOrganizer, courses.renderEditCourse);
   app.post('/courses/edit/:id', auth.requiresOrganizer, courses.editCourse);
 
   //add additional routes that require authentication to access, else they will be redirected to login
   //view course details -> need identifier
   //edit course details -> need identifier
-
+  app.post('/courses/delete/:id', auth.requiresOrganizer, courses.deleteCourse);
   //admin section
   // create new course
-  app.get('/newcourse', courses.renderNewCourse);
-  app.post('/newcourse', courses.submitNewCourse);
+  //app.get('/newcourse', courses.renderNewCourse);
+  //app.post('/newcourse', courses.submitNewCourse);
+
 
   app.post('/organizer/sendReminder/:id', auth.requiresOrganizer, organizer.sendReminders);
 
