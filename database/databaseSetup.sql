@@ -10,9 +10,9 @@ ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFE
 
 
 CREATE TABLE course_sessions (
-	course_id 	 INTEGER NOT NULL,
+	course_id 	 	 INTEGER NOT NULL,
 	session_start	 TIMESTAMP,
-	session_end	 TIMESTAMP,
+	session_end	 	 TIMESTAMP,
 	session_name	 varchar,
 	FOREIGN KEY (course_id) REFERENCES courses
 		ON DELETE CASCADE
