@@ -13,7 +13,7 @@
     <div class="row pt-5 justify-content-center pb-5">
       <form id="courseForm" class="justify-content-around col-12" method="POST" action="<%= '/courses/edit/' + id %>"
         onsubmit="return validateForm()">
-        <h2 class="">Edit Course</h2>
+        <h1 class="">Edit Course</h1>
         <%- include ('../partials/courseForm.ejs') %>
 
         <input type="number" id="sessionTracker" name="sessionTracker" value=<%= sessionNum %>>
@@ -22,20 +22,9 @@
 
     </div>
     <% if (editCourse) { %>
-      <div class="justify-content-center pb-10">
-        <form class="justify-content-around col-12" action="<%= '/courses/delete/' + id %>" method="post" onSubmit="return confirmDelete()">
-          <div class="row">
-            <label for="delCourse">Warning: Deleting courses will delete all sessions and enrolled/waitlisted users. Deleted courses cannot be recovered.</label>
-          </div>
-          <div class="row">
-            <input type="submit" class="btn btn-dark" name="delCourse" value="Delete Course">
-          </div>
-        </form>
-      </div>
-      <br>
+      <%- include ('../partials/editAccessories.ejs') %>
     <% } %>
   </div>
-
 
 </body>
 <script>

@@ -327,6 +327,12 @@ module.exports = {
     WHERE courses.id = course_sessions.course_id
     AND courses.id=$1;
     `;
+
+    let getUserDetails = `
+    SELECT enrollment.user_id, users.email FROM enrollment, users
+    WHERE course_id = $1 AND users.id = enrollment.user_id
+    ORDER BY time asc;
+    `
     //24 hr time format
     //example: 23:59:00
     let timeFormat = /(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]/g;
@@ -336,38 +342,49 @@ module.exports = {
         return res.json('Database error - getting course details for editing');
       }
       if (dbRes.rows.length > 0) {
-        //need to split items into date, start_time, end_time
-        let formattedDates = dbRes.rows.map((oldRow) => {
-          let startSess = new Date(oldRow.session_start);
-          let endSess = new Date(oldRow.session_end);
-          return {
-            date: startSess.toISOString().split('T')[0],
-            start: startSess.toTimeString().match(timeFormat)[0],
-            end: endSess.toTimeString().match(timeFormat)[0],
-            name: oldRow.session_name,
-          };
+        database.query(getUserDetails, [courseID], (dbErr1, dbRes1) => {
+          if (dbErr1) {
+            return res.json("Database error - fetching users for specified course")
+          }
+          //need to split items into date, start_time, end_time
+          let formattedDates = dbRes.rows.map((oldRow) => {
+            let startSess = new Date(oldRow.session_start);
+            let endSess = new Date(oldRow.session_end);
+            return {
+              date: startSess.toISOString().split('T')[0],
+              start: startSess.toTimeString().match(timeFormat)[0],
+              end: endSess.toTimeString().match(timeFormat)[0],
+              name: oldRow.session_name,
+            };
+          });
+
+          let deadlineParts = new Date(dbRes.rows[0]['course_deadline']);
+          let deadline = {
+            date: deadlineParts.toISOString().split('T')[0],
+            time: deadlineParts.toTimeString().match(timeFormat)[0]
+          }
+
+          let seat_capacity = dbRes.rows[0]['seat_capacity'];
+          let enrolledUsers = dbRes1.rows;
+          let waitlistUsers = enrolledUsers.splice(seat_capacity);
+
+          let inputObject = {
+            id: courseID,
+            title: dbRes.rows[0]['course_name'],
+            topic: dbRes.rows[0]['topic'],
+            location: dbRes.rows[0]['location'],
+            description: dbRes.rows[0]['description'],
+            sessionNum: dbRes.rows[0]['sessions'],
+            sessions: formattedDates,
+            deadline: deadline,
+            seats: seat_capacity,
+            enabled: dbRes.rows[0]['enabled'],
+            editCourse: true,
+            users: enrolledUsers,
+            waitlistUsers: waitlistUsers
+          }
+          return res.render('pages/editCourse', inputObject);
         });
-
-        let deadlineParts = new Date(dbRes.rows[0]['course_deadline']);
-        let deadline = {
-          date: deadlineParts.toISOString().split('T')[0],
-          time: deadlineParts.toTimeString().match(timeFormat)[0]
-        }
-
-        let inputObject = {
-          id: courseID,
-          title: dbRes.rows[0]['course_name'],
-          topic: dbRes.rows[0]['topic'],
-          location: dbRes.rows[0]['location'],
-          description: dbRes.rows[0]['description'],
-          sessionNum: dbRes.rows[0]['sessions'],
-          sessions: formattedDates,
-          deadline: deadline,
-          seats: dbRes.rows[0]['seat_capacity'],
-          enabled: dbRes.rows[0]['enabled'],
-          editCourse: true
-        }
-        return res.render('pages/editCourse', inputObject);
       } else {
         return res.json("Could not retrieve course records");
       }
