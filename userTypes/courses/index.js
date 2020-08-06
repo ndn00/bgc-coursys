@@ -8,21 +8,35 @@ const sgMail = require('@sendgrid/mail');
 
 
 module.exports = {
-  //display login
+  
   renderNewCourse: (request, result) => {
-    result.render('pages/newCourse', {
-      id: "",
-      title: "",
-      topic: "",
-      location: "",
-      description: "",
-      sessionNum: 1,
-      sessions: [{ name: "", start: "", end: "", date: "" }],
-      deadline: "",
-      seats: "",
-      enabled: false,
-      editCourse: false
+    let possibleTagsQuery = `SELECT DISTINCT tag FROM tags;`;
+    database.query(possibleTagsQuery, (err, res) => {
+      if (err) {
+        return res.json("Database error - getting available tags");
+      } else {
+        let allTags = []
+        for (row of res.rows) {
+          allTags.push(row["tag"]);
+        }
+        return result.render('pages/newCourse', {
+          id: "",
+          title: "",
+          topic: "",
+          location: "",
+          description: "",
+          sessionNum: 1,
+          sessions: [{ name: "", start: "", end: "", date: "" }],
+          deadline: "",
+          seats: "",
+          curTags: [],
+          allTags: allTags,
+          enabled: false,
+          editCourse: false
+        });
+      }
     });
+    
   },
 
   submitNewCourse: (req, res) => {
@@ -55,12 +69,13 @@ module.exports = {
         //gather number of sessions
         let numSessions = parseInt(req.body.sessionTracker, 10);
         let insertSession = [];
+        let courseID = dbRes.rows[0].id;
 
         //construct query
         let insertSessionQuery = 'INSERT INTO course_sessions (course_id, session_start, session_end, session_name) VALUES\n';
         for (let i = 1; i <= numSessions; i++) {
           insertSessionQuery += '(';
-          insertSession.push(dbRes.rows[0].id);
+          insertSession.push(courseID);
           insertSession.push(req.body['sessionDate' + i] + ' ' + req.body['startTime' + i]);
           insertSession.push(req.body['sessionDate' + i] + ' ' + req.body['endTime' + i]);
           insertSession.push(req.body['sessionName' + i]);
@@ -74,9 +89,35 @@ module.exports = {
         database.query(insertSessionQuery, insertSession, (errOutDB1, dbRes1) => {
           if (errOutDB1) {
             return res.json("Database error - inserting course sessions");
+          } else {
+            console.log(req.body.tags);
+            if (req.body.tags != "") {
+              // construct query for tags
+              let insertTagsQuery = `INSERT INTO tags (course_id, tag) VALUES `;
+              let tags = (req.body.tags).split(',')
+              for (tag of tags) {
+                insertTagsQuery += `(${courseID}, '${tag}'), `
+              }
+              insertTagsQuery = insertTagsQuery.substring(0, insertTagsQuery.length-2);
+              insertTagsQuery += ';'
+              console.log("Tags");
+              console.log(insertTagsQuery);
+
+              database.query(insertTagsQuery, (errDb2, dbRes2) => {
+                if (errDb2) {
+                  return res.json("Database error - inserting tags");
+                } else {
+                  // res.redirect('/organizer/main');
+                  // console.log("I am here");
+                  // return;
+                }
+              }); 
+            }
+            return res.redirect('/organizer/main');
           }
-          return res.redirect('/organizer/main');
         });
+
+        
       }
     });
   },
@@ -328,6 +369,8 @@ module.exports = {
     AND courses.id=$1;
     `;
 
+    let courseTagsQuery = `SELECT tag FROM tags WHERE course_id = $1;`;
+    let possibleTagsQuery = `SELECT DISTINCT tag FROM tags;`;
     let getUserDetails = `
     SELECT enrollment.user_id, users.email FROM enrollment, users
     WHERE course_id = $1 AND users.id = enrollment.user_id
@@ -341,53 +384,73 @@ module.exports = {
       if (dbErr) {
         return res.json('Database error - getting course details for editing');
       }
-      if (dbRes.rows.length > 0) {
-        database.query(getUserDetails, [courseID], (dbErr1, dbRes1) => {
-          if (dbErr1) {
-            return res.json("Database error - fetching users for specified course")
+      database.query(courseTagsQuery, [courseID], (currTagErr, curTagRes) => {
+        if (currTagErr) {
+          return res.json('Database error - getting current course tags for editing')
+        }
+        let currentTags = [];
+        for (row of curTagRes.rows) {
+          currentTags.push(row["tag"]);
+        }
+        database.query(possibleTagsQuery, (allTagErr, allTagRes) => {
+          if (allTagErr) {
+            return res.json('Database error - getting possible tags');
           }
-          //need to split items into date, start_time, end_time
-          let formattedDates = dbRes.rows.map((oldRow) => {
-            let startSess = new Date(oldRow.session_start);
-            let endSess = new Date(oldRow.session_end);
-            return {
-              date: startSess.toISOString().split('T')[0],
-              start: startSess.toTimeString().match(timeFormat)[0],
-              end: endSess.toTimeString().match(timeFormat)[0],
-              name: oldRow.session_name,
-            };
-          });
+          database.query(getUserDetails, [courseID], (userErr, userRes) => {
+            if (userErr) {
+              return res.json("Database error - getting enrolled users for courses")
+            }
+            let possibleTags = [];
+            for (row of allTagRes.rows) {
+              possibleTags.push(row["tag"]);
+            }
+            if (dbRes.rows.length > 0) {
+              //need to split items into date, start_time, end_time
+              let formattedDates = dbRes.rows.map((oldRow) => {
+                let startSess = new Date(oldRow.session_start);
+                let endSess = new Date(oldRow.session_end);
+                return {
+                  date: startSess.toISOString().split('T')[0],
+                  start: startSess.toTimeString().match(timeFormat)[0],
+                  end: endSess.toTimeString().match(timeFormat)[0],
+                  name: oldRow.session_name,
+                };
+              });
+        
+              let deadlineParts = new Date(dbRes.rows[0]['course_deadline']);
+              let deadline = {
+                date: deadlineParts.toISOString().split('T')[0],
+                time: deadlineParts.toTimeString().match(timeFormat)[0]
+              }
 
-          let deadlineParts = new Date(dbRes.rows[0]['course_deadline']);
-          let deadline = {
-            date: deadlineParts.toISOString().split('T')[0],
-            time: deadlineParts.toTimeString().match(timeFormat)[0]
-          }
-
-          let seat_capacity = dbRes.rows[0]['seat_capacity'];
-          let enrolledUsers = dbRes1.rows;
-          let waitlistUsers = enrolledUsers.splice(seat_capacity);
-
-          let inputObject = {
-            id: courseID,
-            title: dbRes.rows[0]['course_name'],
-            topic: dbRes.rows[0]['topic'],
-            location: dbRes.rows[0]['location'],
-            description: dbRes.rows[0]['description'],
-            sessionNum: dbRes.rows[0]['sessions'],
-            sessions: formattedDates,
-            deadline: deadline,
-            seats: seat_capacity,
-            enabled: dbRes.rows[0]['enabled'],
-            editCourse: true,
-            users: enrolledUsers,
-            waitlistUsers: waitlistUsers
-          }
-          return res.render('pages/editCourse', inputObject);
+              let seat_capacity = dbRes.rows[0]['seat_capacity'];
+              let enrolledUsers = userRes.rows;
+              let waitlistUsers = enrolledUsers.splice(seat_capacity);
+        
+              let inputObject = {
+                id: courseID,
+                title: dbRes.rows[0]['course_name'],
+                topic: dbRes.rows[0]['topic'],
+                location: dbRes.rows[0]['location'],
+                description: dbRes.rows[0]['description'],
+                sessionNum: dbRes.rows[0]['sessions'],
+                sessions: formattedDates,
+                deadline: deadline,
+                seats: dbRes.rows[0]['seat_capacity'],
+                curTags: currentTags,
+                allTags: possibleTags,
+                editCourse: true,
+                users: enrolledUsers,
+                waitlistUsers: waitlistUsers
+              }
+              console.log(inputObject);
+              return res.render('pages/editCourse', inputObject);
+            } else {
+              return res.json("Could not retrieve course records");
+            }
+          });  
         });
-      } else {
-        return res.json("Could not retrieve course records");
-      }
+      });
     });
   },
 
@@ -448,6 +511,34 @@ module.exports = {
         database.query(insertSessionQuery, insertSession, (dbErr2, dbRes2) => {
           if (dbErr2) {
             return res.json("Database error - inserting new session records");
+          } else {
+            let deleteTagQuery = `DELETE FROM tags WHERE course_id = ${courseID};`;
+
+            database.query(deleteTagQuery, (delErr, delRes) => {
+              if (delErr) {
+                return res.json("Database error - deleting tags");
+              } else {
+                console.log(req.body.tags);
+                if (req.body.tags != "") {
+                  // construct query for tags
+                  let insertTagsQuery = `INSERT INTO tags (course_id, tag) VALUES `;
+                  let tags = (req.body.tags).split(',')
+                  for (tag of tags) {
+                    insertTagsQuery += `(${courseID}, '${tag}'), `
+                  }
+                  insertTagsQuery = insertTagsQuery.substring(0, insertTagsQuery.length-2);
+                  insertTagsQuery += ';'
+                  console.log("Tags");
+                  console.log(insertTagsQuery);
+    
+                  database.query(insertTagsQuery, (errDb2, dbRes2) => {
+                    if (errDb2) {
+                      return res.json("Database error - inserting tags");
+                    }
+                  }); 
+                }
+              }
+            }); 
           }
           return res.redirect('/organizer/main');
         })
