@@ -8,7 +8,7 @@ const sgMail = require('@sendgrid/mail');
 
 
 module.exports = {
-  
+
   renderNewCourse: (request, result) => {
     let possibleTagsQuery = `SELECT DISTINCT tag FROM tags;`;
     database.query(possibleTagsQuery, (err, res) => {
@@ -36,7 +36,7 @@ module.exports = {
         });
       }
     });
-    
+
   },
 
   submitNewCourse: (req, res) => {
@@ -111,13 +111,13 @@ module.exports = {
                   // console.log("I am here");
                   // return;
                 }
-              }); 
+              });
             }
             return res.redirect('/organizer/main');
           }
         });
 
-        
+
       }
     });
   },
@@ -416,7 +416,7 @@ module.exports = {
                   name: oldRow.session_name,
                 };
               });
-        
+
               let deadlineParts = new Date(dbRes.rows[0]['course_deadline']);
               let deadline = {
                 date: deadlineParts.toISOString().split('T')[0],
@@ -426,7 +426,7 @@ module.exports = {
               let seat_capacity = dbRes.rows[0]['seat_capacity'];
               let enrolledUsers = userRes.rows;
               let waitlistUsers = enrolledUsers.splice(seat_capacity);
-        
+
               let inputObject = {
                 id: courseID,
                 title: dbRes.rows[0]['course_name'],
@@ -436,6 +436,7 @@ module.exports = {
                 sessionNum: dbRes.rows[0]['sessions'],
                 sessions: formattedDates,
                 deadline: deadline,
+                enabled: dbRes.rows[0]['enabled'],
                 seats: dbRes.rows[0]['seat_capacity'],
                 curTags: currentTags,
                 allTags: possibleTags,
@@ -448,7 +449,7 @@ module.exports = {
             } else {
               return res.json("Could not retrieve course records");
             }
-          });  
+          });
         });
       });
     });
@@ -530,15 +531,15 @@ module.exports = {
                   insertTagsQuery += ';'
                   console.log("Tags");
                   console.log(insertTagsQuery);
-    
+
                   database.query(insertTagsQuery, (errDb2, dbRes2) => {
                     if (errDb2) {
                       return res.json("Database error - inserting tags");
                     }
-                  }); 
+                  });
                 }
               }
-            }); 
+            });
           }
           return res.redirect('/organizer/main');
         })

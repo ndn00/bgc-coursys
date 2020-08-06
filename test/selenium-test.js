@@ -446,27 +446,21 @@ describe('login-interactions', function() {
     });
 
     //course editing
-    describe('local-course-editing', function() {
-
+    describe('course-editing', function() {
+      it('should render the course data in the correct fields');
+      it('Adding additional sessions will be visible in the standard course view');
+      it('Changing the "accepting registration" status will hide the course in the attendee landing page');
+      it('Trying to delete the course but not entering the phrase correctly will not make any changes');
+      it('The number of enrolled users should be less than or equal to the seat capacity');
     });
+
+    describe('user-status-changes', function() {
+      it('should render user data in the correct fields')
+      it('creating and enabling a user should allow them to log in. Deleting a user will remove them from the view');
+    })
 
     // email paths
-    describe('no-users-enrolled', () => {
-      await driver.get(loginURL);
-      await driver.sleep(20000);
-      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
-      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
-      await driver.findElement(By.id('loginSubmit')).click();
-      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/24');
-
-      await driver.findElement(By.id('emailConf')).click();
-      await driver.findElement(By.id('emailSendSubmit')).click();
-
-      const message = await driver.findElement(By.id('redirectMessage')).getText();
-      expect(message).to.equal('No users enrolled, no emails sent. You will be redirected to the course view.');
-    });
-
-    describe('no-users-enrolled', () => {
+    describe('no-users-enrolled', async () => {
       await driver.get(loginURL);
       await driver.sleep(20000);
       await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
@@ -482,7 +476,7 @@ describe('login-interactions', function() {
       expect(message).to.equal('No users enrolled, no emails sent. You will be redirected to the course view.');
     });
 
-    describe('email-success', () => {
+    describe('email-success', async () => {
       await driver.get(loginURL);
       await driver.sleep(20000);
       await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
@@ -518,7 +512,7 @@ describe('login-interactions', function() {
     //   expect(message).to.equal('ERROR: EMAIL NOT SENT! API failure. You will be redirected to the course view.');
     // });
 
-    describe('disable-user', () => {
+    describe('disable-user', async () => {
       await driver.get(loginURL);
       await driver.sleep(20000);
       await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
@@ -532,7 +526,7 @@ describe('login-interactions', function() {
       const message = await driver.findElement(By.id('redirectMessage')).getText();
       await driver.get(logoutURL);
       expect(message).to.equal('User data has been successfully updated! You will be redirected to the main courses page.');
-      
+
       await driver.get(loginURL);
       await driver.findElement(By.name('uname')).sendKeys('mla283@sfu.ca');
       await driver.findElement(By.name('pwd')).sendKeys('Password123!');
@@ -542,7 +536,7 @@ describe('login-interactions', function() {
       expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/login');
     });
 
-    describe('approve-user', () => {
+    describe('approve-user', async () => {
       await driver.get(loginURL);
       await driver.sleep(20000);
       await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
@@ -556,7 +550,7 @@ describe('login-interactions', function() {
       const message = await driver.findElement(By.id('redirectMessage')).getText();
       await driver.get(logoutURL);
       expect(message).to.equal('User data has been successfully updated! You will be redirected to the main courses page.');
-      
+
       await driver.get(loginURL);
       await driver.findElement(By.name('uname')).sendKeys('mla283@sfu.ca');
       await driver.findElement(By.name('pwd')).sendKeys('Password123!');
