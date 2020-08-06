@@ -4,6 +4,7 @@
 
 const database = require('../../database');
 const sgMail = require('@sendgrid/mail');
+const io = require('../../config/io').io();
 
 
 
@@ -59,7 +60,6 @@ module.exports = {
       (req.body.deadline + ' ' + req.body.deadTime),
       req.body.description,
       req.body.registration === 'enabled' ? true : false
-
     ];
     //console.log(insertQuery);
     database.query(insertQuery, insertObject, (errOutDB, dbRes) => {
@@ -113,6 +113,17 @@ module.exports = {
                 }
               });
             }
+            io.emit('addedcourse', {course: {
+              id: courseID,
+              title: insertObject[0],
+              topic: insertObject[1],
+              delivery: insertObject[2],
+              sessions: insertObject[3],
+              seats: 0,
+              maxSeats: insertObject[4],
+              rdeadline: Date(insertObject[5]).toLocaleString("en-US", {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}),
+              status: insertObject[7] ? 'Open' : 'Closed',
+            }});
             return res.redirect('/organizer/main');
           }
         });
