@@ -16,14 +16,12 @@ module.exports = {
   //otherwise, render login page
   login: (request, result) => {
     if (request.user) {
-      console.log(request.user.approved);
+      //console.log(request.user.approved);
       if (request.user.approved === false) {
         return result.render('pages/login', {errors: ["Please wait to be approved by an administrator"]});
       }
-      if (request.user.type === 'attendee') {
+      if (request.user.type) {
         return result.redirect('/main');
-      } else if (request.user.type === 'organizer') {
-        return result.redirect('/organizer/main');
       }
     }
     return result.render('pages/login', {errors: []});
@@ -35,42 +33,82 @@ module.exports = {
 
   //NOTE: dummy data (will code database storage later)
   landing: async (request, result) => {
+    let isOrganizer = request.user.type === 'organizer' ? true: false;
+
+    /*
     let queryCourse = `
-    SELECT id, course_name, topic, location, course_deadline,
-            seat_capacity
+    SELECT id, course_name, topic, location, sessions, course_deadline,
+            seat_capacity, enabled, count(e.user_id) AS seats
     FROM courses
-    WHERE course_deadline >= CURRENT_DATE;
+    LEFT JOIN enrollment e ON e.course_id = id
+    WHERE course_deadline >= CURRENT_DATE AND enabled=true
+    GROUP BY id
+    ORDER BY course_deadline ASC;
     `;
+    */
+    let queryCourse = `
+    SELECT
+    id, course_name, topic, location, sessions, course_deadline,
+    seat_capacity, enabled, count(e.user_id) AS seats, min(cs.session_start) AS next_sess
+    FROM courses
+    LEFT JOIN enrollment e ON e.course_id = id
+    LEFT JOIN course_sessions cs ON cs.course_id = id
+    WHERE course_deadline >= CURRENT_DATE AND enabled=true AND cs.session_start >= CURRENT_TIMESTAMP
+    GROUP BY id
+    ORDER BY course_deadline ASC;`
+
+    let queryPosition = `
+    SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN
+    (SELECT course_id FROM enrollment e WHERE e.user_id = $1 AND e2.time<=e.time ORDER BY time ASC)
+    GROUP BY course_id;
+    `;
+
 
     try {
       var data = [];
 
       database.query(queryCourse, (errOutDB, dbRes) => {
         if (errOutDB) {
-          result.send("Error querying db on landing/main");
+          return result.send("Error querying db on landing/main");
         } else {
-          var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
-          for (var row=0; row < dbRes.rows.length; row++) {
-            let deadlineDate = new Date(dbRes.rows[row].course_deadline);
-            data.push(
-              {
-                  id: dbRes.rows[row].id,
-                  title: dbRes.rows[row].course_name,
-                  topic: dbRes.rows[row].topic,
-                  delivery: dbRes.rows[row].location,
-                  time: deadlineDate.toLocaleString("en-US", dateFormat),
-                  seats: '?',
-                  maxSeats: dbRes.rows[row].seat_capacity,
-                  status: "N/A"
+          //console.log(dbRes);
+          database.query(queryPosition, [request.user.id], (posError, posRes) => {
+            if (posError) {
+              return result.send("Error querying position");
+            } else {
+              var dateFormat = {dateStyle: 'short', timeStyle: 'short'};
+              var positionMap = posRes.rows.reduce((map, obj) => {
+                map[obj.course_id] = obj.position;
+                return map;
+              }, {});
+              for (var row=0; row < dbRes.rows.length; row++) {
+                let deadlineDate = new Date(dbRes.rows[row].course_deadline);
+                let nextDate = new Date(dbRes.rows[row].next_sess);
+                //console.log(positionMap[dbRes.rows[row].id]);
+                data.push(
+                  {
+                      id: dbRes.rows[row].id,
+                      title: dbRes.rows[row].course_name,
+                      topic: dbRes.rows[row].topic,
+                      delivery: dbRes.rows[row].location,
+                      sessions: dbRes.rows[row].sessions,
+                      time: deadlineDate.toLocaleString("en-US", dateFormat),
+                      nextSession: nextDate.toLocaleString("en-US", dateFormat),
+                      position: (positionMap[dbRes.rows[row].id]) ? positionMap[dbRes.rows[row].id] : '?',
+                      seats: dbRes.rows[row].seats,
+                      maxSeats: dbRes.rows[row].seat_capacity,
+                      status: (positionMap[dbRes.rows[row].id]) ? (positionMap[dbRes.rows[row].id] > dbRes.rows[row].seat_capacity) ? "Waitlisted" : "Enrolled" : "Open"
+                  }
+                );
               }
-            );
-          }
-          console.log(data);
-          result.render('pages/index', { data: data });
+              //console.log(data);
+              return result.render('pages/index', { isOrganizer: isOrganizer, data: data });
+            }
+          });
         }
       });
     } catch (err) {
-      result.send("Error");
+      return result.send("Error");
     }
 
   },

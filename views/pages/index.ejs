@@ -7,13 +7,19 @@
 
 <body>
 
-  <%- include('../partials/nav.ejs') %>
+  <% if (isOrganizer) { %>
+    <%- include('../partials/orgNav.ejs') %>
+  <% } else { %>
+    <%- include('../partials/nav.ejs') %>
+  <% } %>
+
+
 
   <div class="container">
     <div class="row pt-5 pb-2 justify-content-between">
       <div class="col-6">
         <h2>Upcoming courses
-          <i class="material-icons">event</i>
+          <!--<i class="material-icons">event</i>-->
         </h2>
       </div>
       <div class="col-5">
@@ -36,7 +42,9 @@
             <th scope="col">Course Name</th>
             <th scope="col">Topic</th>
             <th scope="col">Location</th>
+            <th scope="col">Sessions</th>
             <th scope="col">Registration Deadline</th>
+            <th scope="col">Next Session</th>
             <th scope="col">Seats</th>
             <th scope="col">Status</th>
             <th scope="col">Actions</th>
@@ -50,13 +58,17 @@
             <td><a href=<%= '/courses/' + item.id %>><%= item.title %></a></td>
             <td><%= item.topic %></td>
             <td><%= item.delivery %></td>
+            <td><%= item.sessions %></td>
             <td><%= item.time %></td>
-            <!-- <td><%= item.seats %>/<%= item.maxSeats %></td>  SEATS NOT AVAILABLE YET-->
-            <td><%= item.maxSeats %></td>
+            <td><%= item.nextSession %></td>
+            <% if (item.position > item.maxSeats) { %>
+              <td><%= item.seats %>/<%= item.maxSeats %> [<%= (item.position-item.maxSeats) %>]</td>
+            <% } else { %>
+              <td><%= item.seats %>/<%= item.maxSeats %></td>
+            <% } %>
             <td><%= item.status %></td>
             <td>
               <a href=<%= '/courses/' + item.id %>><i class="material-icons md-24">visibility</i></a>
-              <i class="material-icons md-24">star</i>
             </td>
           </tr>
           <% }); %>

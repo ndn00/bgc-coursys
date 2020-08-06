@@ -3,7 +3,7 @@
 
 <head>
   <%- include ('../partials/header.ejs') %>
-
+  <%- include ('../partials/selectizeHeader.ejs') %>
 </head>
 
 <body>
@@ -13,18 +13,79 @@
     <div class="row pt-5 justify-content-center pb-5">
       <form id="courseForm" class="justify-content-around col-12" method="POST" action="<%= '/courses/edit/' + id %>"
         onsubmit="return validateForm()">
-        <h2 class="">Edit Course</h2>
+        <h1 class="">Edit Course</h1>
         <%- include ('../partials/courseForm.ejs') %>
 
         <input type="number" id="sessionTracker" name="sessionTracker" value=<%= sessionNum %>>
         <input type="submit" class="btn btn-dark" value="Save">
       </form>
-    </div>
-  </div>
 
+    </div>
+    <% if (editCourse) { %>
+      <%- include ('../partials/editAccessories.ejs') %>
+    <% } %>
+  </div>
 
 </body>
 <script>
+  $('#tags').selectize({
+      persist: false,
+      maxItems: null,
+      valueField: 'tag',
+      searchField: ['tag'],
+      options: [
+        <% for (tag of allTags) { %>
+          {tag: '<%=tag %>'},
+        <% } %>
+      ],
+      <% if (curTags.length != 0) { %>
+        items: [
+          <% for (tag of curTags) { %>
+            '<%=tag%>',
+          <% } %>
+        ],
+      <% } %>
+      render: {
+          item: function(item, escape) {
+              return '<div>' +
+                  (item.tag ? '<span class="tag">' + escape(item.tag) + '</span>' : '') +
+              '</div>';
+          },
+          option: function(item, escape) {
+              var label = item.tag;
+              return '<div>' +
+                  '<span class="label">' + escape(label) + '</span>' +
+              '</div>';
+          }
+      },
+      createFilter: function(input) {
+          var match, regex;
+
+          regex = new RegExp('^.+$', 'i');
+          match = input.match(regex);
+          if (match) return !this.options.hasOwnProperty(match[0]);
+
+
+          return false;
+      },
+      create: function(input) {
+          if ((new RegExp('^.+$', 'i')).test(input)) {
+              return {tag: input};
+          }
+          var match = input.match(new RegExp('^.+$', 'i'));
+          if (match) {
+              return {
+                  tag : match[0],
+              };
+          }
+          alert('Invalid Input');
+          return false;
+      }
+  });
+
+
+
+
   //identical to the script from newCourse.ejs except numSessions does not necessarily start at 1
   //handy materials
   let numSessions = document.getElementById('sessionTracker').value;
@@ -96,6 +157,15 @@
       previousEnd = endDateTime;
     }
     return true;
+  }
+
+  function confirmDelete() {
+    let confirm = window.prompt("To confirm deletion, type the following exactly:\nPlease delete this course.")
+    if (confirm === 'Please delete this course.') {
+      return true;
+    } else {
+      return false;
+    }
   }
   //create new session
   // function newSession() {
