@@ -20,6 +20,7 @@ io.on('connection', function (socket) {
     });
 });
 
+
 //Require databases in other files
 const db = require('./database');
 
