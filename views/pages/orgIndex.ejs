@@ -48,12 +48,11 @@
           <% data.forEach((item, index) => { %>
           <tr>
             <th scope="row"><%=index+1 %></th>
-            <td><a href=<%="/courses/" + item.id %>><%= item.title %></a></td>
+            <td><a href=<%="/courses/edit/" + item.id %>><%= item.title %></a></td>
             <td><%= item.topic %></td>
             <td><%= item.delivery %></td>
             <td><%= item.sessions %></td>
-            <!-- <td><%= item.seats %>/<%= item.maxSeats %></td> current seats not available yet-->
-            <td><%= item.maxSeats %></td>
+            <td><%= item.seats %>/<%= item.maxSeats %></td>
             <td><%= item.deadline %></td>
             <td><%= item.status %></td>
             <td>
@@ -67,17 +66,6 @@
       </table>
     </div>
   </div>
-  <script>
-    /*
-    Not ideal to run edit/delete through main page without fine control over details, so will remove
-    window.onload = () => {
-      $('#tb').SetEditable({
-        // TODO: Add event handlers
-      });
-      console.log("hi");
-    }
-    */
-  </script>
 </body>
 
 </html>

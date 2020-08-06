@@ -17,21 +17,31 @@ module.exports = {
         `;
 				*/
 
-				//need to have some mechanism to delete courses
+				//data to show:
+				//Name
+				//topic
+				//location
+				//sessions
+				//(Total enrolled + waitlist) / max seats
+				//status: Full (enrolling = waitlist), Open (not full yet), Closed (not accepting registration)
+				//actions: edit, delete
+
+
 				let queryCourse = `
 		    SELECT id, course_name, topic, location, sessions, course_deadline,
-		            seat_capacity, count(e.user_id) AS seats
-		    FROM courses LEFT JOIN  enrollment e ON e.course_id = id
+		            seat_capacity, enabled, count(e.user_id) AS seats
+		    FROM courses LEFT JOIN enrollment e ON e.course_id = id
 		    GROUP BY id
 		    ORDER BY course_deadline ASC;
 		    `;
 
+				/*
 		    let queryPosition = `
 		    SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN
 		    (SELECT course_id FROM enrollment e WHERE e.user_id = $1 AND e2.time<=e.time ORDER BY time ASC)
 		    GROUP BY course_id;
 		    `;
-
+				*/
 
         try {
             var data = [];
@@ -40,18 +50,12 @@ module.exports = {
 										console.log(errOutDB);
                     result.send("Error querying db on landing/main");
                 } else {
-									database.query(queryPosition, [request.user.id], (dbErr1, dbRes1) => {
-										if (dbErr1) {
-											return res.json("Error querying enrollment position on organizer")
-										}
 										var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
-			              var positionMap = dbRes1.rows.reduce((map, obj) => {
-			                map[obj.course_id] = obj.position;
-			                return map;
-			              }, {});
 										for (var row=0; row < dbRes.rows.length; row++) {
-                        let startDate = new Date(dbRes.rows[row].start_date);
+                        //let startDate = new Date(dbRes.rows[row].start_date);
 												let deadDate = new Date(dbRes.rows[row].course_deadline);
+												let seats = dbRes.rows[row].seats;
+												let maxSeats = dbRes.rows[row].seat_capacity;
                         data.push(
                             {
 																id: dbRes.rows[row].id,
@@ -61,17 +65,14 @@ module.exports = {
                                 //time: startDate.toLocaleString("en-US", dateFormat),
 																deadline: deadDate.toLocaleString("en-US", dateFormat),
 																sessions: dbRes.rows[row].sessions,
-                                seats: dbRes.rows[row].seats,
-                                maxSeats: dbRes.rows[row].seat_capacity,
-                                status: (positionMap[dbRes.rows[row].id]) ? (positionMap[dbRes.rows[row].id] > dbRes.rows[row].seat_capacity) ? "Waitlisted" : "Enrolled" : "Open"
+                                seats: seats,
+                                maxSeats: maxSeats,
+                                status: dbRes.rows[row].enabled ? seats >= maxSeats ? "Full" : "Open" : "Closed"
                             }
                         );
                     }
                     console.log(data);
                     result.render('pages/orgIndex', { data: data });
-									});
-
-
 										//var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
 
                 }

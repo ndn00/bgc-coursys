@@ -16,7 +16,7 @@ module.exports = {
   //otherwise, render login page
   login: (request, result) => {
     if (request.user) {
-      console.log(request.user.approved);
+      //console.log(request.user.approved);
       if (request.user.approved === false) {
         return result.render('pages/login', {errors: ["Please wait to be approved by an administrator"]});
       }
@@ -35,11 +35,14 @@ module.exports = {
 
   //NOTE: dummy data (will code database storage later)
   landing: async (request, result) => {
+    let isOrganizer = request.user.type === 'organizer' ? true: false;
+
     let queryCourse = `
     SELECT id, course_name, topic, location, course_deadline,
-            seat_capacity, count(e.user_id) AS seats
-    FROM courses LEFT JOIN  enrollment e ON e.course_id = id
-    WHERE course_deadline >= CURRENT_DATE
+            seat_capacity, enabled, count(e.user_id) AS seats
+    FROM courses
+    LEFT JOIN enrollment e ON e.course_id = id
+    WHERE course_deadline >= CURRENT_DATE AND enabled=true
     GROUP BY id
     ORDER BY course_deadline ASC;
     `;
@@ -63,7 +66,7 @@ module.exports = {
             if (posError) {
               result.send("Error querying position");
             } else {
-              var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
+              var dateFormat = {dateStyle: 'short', timeStyle: 'short'};
               var positionMap = posRes.rows.reduce((map, obj) => {
                 map[obj.course_id] = obj.position;
                 return map;
@@ -77,7 +80,7 @@ module.exports = {
                       title: dbRes.rows[row].course_name,
                       topic: dbRes.rows[row].topic,
                       delivery: dbRes.rows[row].location,
-                      time: deadlineDate.toLocaleString("en-US", dateFormat),
+                      time: deadlineDate.toLocaleString("en-US"),
                       position: (positionMap[dbRes.rows[row].id]) ? positionMap[dbRes.rows[row].id] : '?',
                       seats: dbRes.rows[row].seats,
                       maxSeats: dbRes.rows[row].seat_capacity,
@@ -86,7 +89,7 @@ module.exports = {
                 );
               }
               console.log(data);
-              result.render('pages/index', { data: data });
+              result.render('pages/index', { isOrganizer: isOrganizer, data: data });
             }
           });
         }

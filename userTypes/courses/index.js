@@ -20,18 +20,19 @@ module.exports = {
       sessions: [{ name: "", start: "", end: "", date: "" }],
       deadline: "",
       seats: "",
+      editCourse: false
     });
   },
 
   submitNewCourse: (req, res) => {
     let insertQuery = `
-      INSERT INTO courses (course_name, topic, location, sessions, seat_capacity, course_deadline, description)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO courses (course_name, topic, location, sessions, seat_capacity, course_deadline, description, enabled)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id;
       `;
 
     //verify that deadline time is valid
-    console.log(req.body.deadline + " " + req.body.deadTime);
+    //console.log(req.body.deadline + " " + req.body.deadTime);
 
     //use returning from first query to get the ID for the session insert
     let insertObject = [
@@ -41,7 +42,8 @@ module.exports = {
       req.body.sessionTracker,
       req.body.capacity,
       (req.body.deadline + ' ' + req.body.deadTime),
-      req.body.description
+      req.body.description,
+      req.body.registration === 'enabled' ? true : false
 
     ];
     //console.log(insertQuery);
@@ -135,12 +137,18 @@ module.exports = {
             return res.render('pages/viewCourse', inputObject);
           });
         } else {
-          return res.json("Could not retrieve course records");
+          let inputObject = {
+            redirect: '/main',
+            message: 'Course does not exist.',
+            target: 'the main page'
+          }
+          return res.render('pages/redirect', inputObject)
         }
       });
 
 
   },
+
   enrollCourse: (req, res) => {
     //TODO: check whether user is already enrolled to prevent double enrollment
     let courseID = parseInt(req.params.id, 10);
@@ -203,7 +211,7 @@ module.exports = {
     });
   },
 
-  withdrawlCourse: async (req, res) => {
+  withdrawCourse: async (req, res) => {
     let courseID = parseInt(req.params.id, 10);
     let userID = req.user.id;
     let userPosition = 0;
@@ -239,7 +247,7 @@ module.exports = {
       }
     });
 
-    // withdrawl user from course
+    // withdraw user from course
     let removeCourseEnrollment = `
         DELETE FROM enrollment WHERE user_id=${req.user.id} AND course_id=${courseID};
         `;
@@ -285,11 +293,12 @@ module.exports = {
       }
     });
   },
+
   renderEditCourse: (req, res) => {
     let courseID = parseInt(req.params.id, 10);
     let getCourseDetails = `
     SELECT courses.course_name, courses.topic, courses.location, courses.sessions, courses.seat_capacity,
-    courses.description, courses.course_deadline, course_sessions.session_start, course_sessions.session_end, course_sessions.session_name
+    courses.description, courses.enabled, courses.course_deadline, course_sessions.session_start, course_sessions.session_end, course_sessions.session_name
     FROM courses, course_sessions
     WHERE courses.id = course_sessions.course_id
     AND courses.id=$1;
@@ -331,6 +340,8 @@ module.exports = {
           sessions: formattedDates,
           deadline: deadline,
           seats: dbRes.rows[0]['seat_capacity'],
+          enabled: dbRes.rows[0]['enabled'],
+          editCourse: true
         }
         return res.render('pages/editCourse', inputObject);
       } else {
@@ -343,8 +354,8 @@ module.exports = {
     let courseID = parseInt(req.params.id, 10);
     let updateCourseDetails = `
     UPDATE courses
-    SET course_name=$1, topic=$2, location=$3, sessions=$4, seat_capacity=$5, description=$6, course_deadline=$7
-    WHERE id=$8;
+    SET course_name=$1, topic=$2, location=$3, sessions=$4, seat_capacity=$5, description=$6, course_deadline=$7, enabled=$8
+    WHERE id=$9;
     `;
     let updateCourseContent = [
       req.body.coursename,
@@ -354,7 +365,8 @@ module.exports = {
       req.body.capacity,
       req.body.description,
       (req.body.deadline + ' ' + req.body.deadTime),
-      courseID
+      (req.body.registration === 'enabled' ? true : false),
+      courseID,
     ];
     database.query(updateCourseDetails, updateCourseContent, (dbErr, dbRes) => {
       if (dbErr) {
@@ -404,5 +416,18 @@ module.exports = {
 
     })
   },
+
+  deleteCourse: (req, res) => {
+    //can be called by organizers (accompanied by client-side alerts)
+    let courseID = parseInt(req.params.id, 10);
+    let deleteQuery = `DELETE FROM courses WHERE id=$1;`
+    database.query(deleteQuery, [courseID], (dbErr, dbRes) => {
+      if (dbErr) {
+        return res.json("Database error - could not delete course")
+      }
+      return res.redirect('/organizer/main')
+    })
+  },
+
 
 }
