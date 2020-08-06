@@ -151,9 +151,10 @@ module.exports = {
   },
 
   enrollCourse: (req, res) => {
-    //TODO: check whether user is already enrolled to prevent double enrollment
     let courseID = parseInt(req.params.id, 10);
     let userID = req.user.id;
+
+    /*
     let userPosition = 0;
 
     let courseCapacity = 0;
@@ -170,8 +171,9 @@ module.exports = {
         return res.json("Could not retrieve course records");
       }
     });
+    /*
     // update user position
-    let getCourseEnrollment = 'SELECT * FROM enrollment WHERE course_id = $1';
+    let getCourseEnrollment = 'SELECT user_id, time FROM enrollment WHERE course_id = $1';
     database.query(getCourseEnrollment, [courseID], (dbErr, dbRes) => {
       if (dbErr) {
         return res.json("Database error - retrieving enrollment info");
@@ -184,31 +186,52 @@ module.exports = {
         userPosition++;
       }
     });
-
+    console.log(userPosition)
+    */
     // enrolling user into course
     let insertCourseEnrollment = `
         INSERT INTO enrollment (course_id, user_id, time) VALUES ($1, $2, CURRENT_TIMESTAMP);
         `;
-    console.log(courseID + " " + userID);
+
+    let getTotalPositions = `SELECT seat_capacity FROM courses WHERE id=$1;`;
+
+    //obviously, some of these queries could be combined together
+    let queryPosition = `
+    SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN
+    (SELECT course_id FROM enrollment e WHERE e.user_id = $1 AND e2.time<=e.time ORDER BY time ASC)
+    GROUP BY course_id;
+    `;
+
+    //console.log(courseID + " " + userID);
     database.query(insertCourseEnrollment, [courseID, userID], (dbErr, dbRes) => {
       if (dbErr) {
-        console.log(dbErr);
+        //console.log(dbErr);
         let errorBlock = {
           redirect: '/main',
           message: 'You are already enrolled (or there is some nasty primary key desync).',
           target: 'the main page'
         };
         return res.render("pages/redirect", errorBlock);
-      } else {
-        //redirect to message + main
-        //res.redirect('/courses/' + courseID);
-        let backToMain = {
-          redirect: '/main',
-          message: 'Course enrolled successfully!',
-          target: 'the main page'
-        };
-        res.render('pages/redirect', backToMain);
       }
+      database.query(getTotalPositions, [courseID], (dbErr1, dbRes1) => {
+        if (dbErr1) {
+          return res.json("Database error - checking seat capacity for enrollment")
+        }
+        database.query(queryPosition, [userID], (dbErr2, dbRes2) => {
+          let backToMain = {
+            redirect: '/main',
+            target: 'the main page'
+          };
+          if (dbErr2) {
+            return res.json("Database error - checking position for enrollment")
+          } else if (dbRes2.rows[0].position > dbRes1.rows[0].seat_capacity) {
+            backToMain.message = "Added to waitlist for this course. You will be notified if you move off the waitlist."
+          } else {
+            backToMain.message = "Course enrolled successfully!"
+          }
+          return res.render('pages/redirect', backToMain);
+        });
+      });
     });
   },
 

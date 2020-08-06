@@ -60,19 +60,10 @@
       </form>
     <% } else { %>
       <form action="/courses/withdraw/<%= id %>" method="POST">
-        <input type="submit" class="btn btn-dark" value="withdraw">
+        <input type="submit" class="btn btn-dark" value="Withdraw">
       </form>
     <% } %>
   </div>
-
-
-    <% if (!isOrganizer) { %>
-    <div class="row pb-5">
-      <form action="/courses/enroll/<%= id %>" method="POST">
-        <input type="submit" class="btn btn-dark" value="Enroll">
-      </form>
-    </div>
-    <% } %>
 
     <% if (isOrganizer) { %>
     <div class="row pt-5 pb-2">

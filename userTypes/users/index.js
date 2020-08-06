@@ -53,7 +53,7 @@ module.exports = {
     FROM courses
     LEFT JOIN enrollment e ON e.course_id = id
     LEFT JOIN course_sessions cs ON cs.course_id = id
-    WHERE course_deadline >= CURRENT_DATE AND enabled=true AND cs.session_start >= CURRENT_DATE
+    WHERE course_deadline >= CURRENT_DATE AND enabled=true AND cs.session_start >= CURRENT_TIMESTAMP
     GROUP BY id
     ORDER BY course_deadline ASC;`
 
@@ -101,7 +101,7 @@ module.exports = {
                   }
                 );
               }
-              console.log(data);
+              //console.log(data);
               return result.render('pages/index', { isOrganizer: isOrganizer, data: data });
             }
           });

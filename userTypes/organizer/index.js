@@ -47,7 +47,7 @@ module.exports = {
             var data = [];
             database.query(queryCourse, (errOutDB, dbRes) => {
                 if (errOutDB){
-										console.log(errOutDB);
+										//console.log(errOutDB);
                     result.send("Error querying db on landing/main");
                 } else {
 										var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
@@ -71,7 +71,7 @@ module.exports = {
                             }
                         );
                     }
-                    console.log(data);
+                    //console.log(data);
                     result.render('pages/orgIndex', { data: data });
 										//var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
 
@@ -148,7 +148,7 @@ module.exports = {
 		}
 
 		let deletedUsersString = deletedUsers.map((number) => {
-			console.log(number.toString(10));
+			//console.log(number.toString(10));
 			return number.toString(10);
 		});
 
@@ -260,7 +260,7 @@ module.exports = {
 		if (newDisable.length > 0) {
 			database.query(newDisableQuery, newDisable,  (dbErr, dbRes) => {
 				if (dbErr) {
-					console.log(dbErr);
+					//console.log(dbErr);
 					errors.push("Database error - could not update new disabled");
 				}
 			});
