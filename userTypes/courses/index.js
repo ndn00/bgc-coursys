@@ -20,6 +20,7 @@ module.exports = {
       sessions: [{ name: "", start: "", end: "", date: "" }],
       deadline: "",
       seats: "",
+      enabled: false,
       editCourse: false
     });
   },
@@ -202,7 +203,7 @@ module.exports = {
         //redirect to message + main
         //res.redirect('/courses/' + courseID);
         let backToMain = {
-          redirect: req.user.type === 'organizer' ? '/organizer/main' : '/main',
+          redirect: '/main',
           message: 'Course enrolled successfully!',
           target: 'the main page'
         };
