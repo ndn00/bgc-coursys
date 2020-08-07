@@ -31,6 +31,7 @@ module.exports = {
     return result.render('pages/login', {errors: ["Authentication error (incorrect email or password)."]});
   },
 
+
   //NOTE: dummy data (will code database storage later)
   landing: async (request, result) => {
     let isOrganizer = request.user.type === 'organizer' ? true: false;

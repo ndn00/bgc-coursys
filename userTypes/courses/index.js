@@ -113,18 +113,34 @@ module.exports = {
                 }
               });
             }
-            io.emit('addedcourse', {course: {
-              id: courseID,
-              title: insertObject[0],
-              topic: insertObject[1],
-              delivery: insertObject[2],
-              sessions: insertObject[3],
-              seats: 0,
-              maxSeats: insertObject[4],
-              rdeadline: Date(insertObject[5]).toLocaleString("en-US", {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}),
-              status: insertObject[7] ? 'Open' : 'Closed',
-            }});
-            return res.redirect('/organizer/main');
+            let rdlDate = new Date(insertObject[5]);
+            var nextDate;
+            let queryUpdateSession = 
+            "SELECT min(cs.session_start) AS next_sess from courses LEFT JOIN course_sessions cs ON cs.course_id = id WHERE course_deadline >= CURRENT_DATE AND cs.session_start >= CURRENT_TIMESTAMP AND id = $1;";
+            database.query(queryUpdateSession, [courseID], (errOutDB3, dbRes3) => {
+                if(errOutDB3){
+                  return res.json("Database error - getting session update");
+                } else {
+                  console.log(dbRes3.rows[0]['next_sess']);
+                  nextDate = new Date(dbRes3.rows[0].next_sess);
+                }
+                console.log(nextDate + " " + courseID);
+                io.emit('courseAdd', {course: {
+                  id: courseID,
+                  title: insertObject[0],
+                  topic: insertObject[1],
+                  delivery: insertObject[2],
+                  sessions: insertObject[3],
+                  nextSession: nextDate.toLocaleString("en-US", {dateStyle: 'short', timeStyle: 'short'}),
+                  seats: 0,
+                  maxSeats: insertObject[4],
+                  rdeadline: rdlDate.toLocaleString("en-US", {dateStyle: 'short', timeStyle: 'short'}),
+                  status: insertObject[7] ? 'Open' : 'Closed',
+                }});
+                return res.redirect('/organizer/main');
+              }
+            );
+            
           }
         });
 
@@ -281,6 +297,7 @@ module.exports = {
           } else {
             backToMain.message = "Course enrolled successfully!"
           }
+          io.emit('courseEnroll', {courseID: courseID});
           return res.render('pages/redirect', backToMain);
         });
       });
@@ -365,6 +382,7 @@ module.exports = {
             }
           });
         }
+        io.emit("courseWithdraw", {courseID: courseID});
         res.redirect('/courses/' + courseID);
       }
     });
@@ -569,8 +587,10 @@ module.exports = {
       if (dbErr) {
         return res.json("Database error - could not delete course")
       }
+      io.emit("courseDelete", {courseID: courseID});
       return res.redirect('/organizer/main')
     })
+    
   },
 
 

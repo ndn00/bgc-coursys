@@ -50,7 +50,7 @@ module.exports = {
 										//console.log(errOutDB);
                     result.send("Error querying db on landing/main");
                 } else {
-										var dateFormat = {hour:'numeric', minute: 'numeric', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
+										var dateFormat = {dateStyle: 'short', timeStyle: 'short'};
 										for (var row=0; row < dbRes.rows.length; row++) {
                         //let startDate = new Date(dbRes.rows[row].start_date);
 												let deadDate = new Date(dbRes.rows[row].course_deadline);

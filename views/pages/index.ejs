@@ -23,7 +23,8 @@
         </h2>
       </div>
     </div>
-    <table id="tb" class="table table-striped col-12" data-toggle="table" data-pagination="true" data-search="true">
+    <table id="tb" class="table table-striped col-12" data-toggle="table" data-pagination="true" data-search="true"
+      data-unique-id="id">
       <thead>
         <tr>
           <th class="d-none" scope="col" data-field="id" data-sortable="false"></th>
@@ -65,6 +66,9 @@
       $(location).attr('href', '/courses/' + row.id);
     }
     function addRow(course) {
+      if (course.position > course.maxSeats) {
+        // handle waitlist
+      }
       $("#tb").bootstrapTable('insertRow', {
         index: 0,
         row: {
@@ -73,19 +77,55 @@
           topic: course.topic,
           delivery: course.delivery,
           sessions: course.sessions,
+          nextSession: course.nextSession,
           seats: (course.seats + "/" + course.maxSeats),
           rdeadline: course.rdeadline,
           status: course.status || 'N/A',
-          modify: '<i class="btn p-0 m-0 material-icons md-36">edit</i>'
         }
       });
     }
+    function removeRow(id) {
+      $("#tb").bootstrapTable('removeByUniqueId', id);
+    }
+    function updateCourse(id, course) {
+      $("#tb").bootstrapTable('updateByUniqueId', {
+        id: id,
+        row: {
+          id: course.id,
+          title: course.title,
+          topic: course.topic,
+          delivery: course.delivery,
+          sessions: course.sessions,
+          nextSession: course.nextSession,
+          seats: (course.seats + "/" + course.maxSeats),
+          rdeadline: course.rdeadline,
+          status: course.status || 'N/A',
+        }
+      })
+    }
+    // force reload when using back button
+    if (performance.navigation.type == 2) {
+      location.reload(true);
+    }
     $("#tb").on('click-cell.bs.table', handleCellClick);
 
-    socket.on('addedcourse', (data) => {
+    socket.on('courseAdd', (data) => {
       console.log(data.course);
-      location.reload(true);
-      // addRow(data.course);
+      // location.reload(true);
+      if (data.course.status = 'Open') { addRow(data.course); }
+    });
+    socket.on('courseDelete', (data) => {
+      removeRow(data.courseID);
+    });
+    socket.on('courseEnroll', (data) => {
+      $.get("/coursedata/" + data.courseID, (response, status) => {
+        updateCourse(data.courseID, response.json());
+      });
+    });
+    socket.on('courseWithdraw', (data) => {
+      $.get("/coursedata/" + data.courseID, (response, status) => {
+        updateCourse(data.courseID, response.json());
+      });
     });
   </script>
 </body>
