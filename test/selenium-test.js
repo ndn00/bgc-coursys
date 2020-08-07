@@ -504,7 +504,7 @@ describe('login-interactions', function() {
         await driver.get(logoutURL);
 
         expect(waitlist + enrolled).to.be.above(capacity);
-      })
+      });
     });
 
     describe('course-integration-testing', function() {
@@ -550,14 +550,50 @@ describe('login-interactions', function() {
         await driver.findElement(By.name('delCourse')).click();
         await driver.switchTo().alert().sendKeys('Please delete this course.');
         await driver.switchTo().alert().accept();
-        await driver.sleep(3000);
+        await driver.sleep(4000);
+        const testURL = await driver.getCurrentUrl();
 
         await driver.get(logoutURL);
         expect(initCourses).to.equal(shouldBeSame);
         expect(moreByOne).to.be.above(initCourses);
+        expect(testURL).to.equal(orgMain);
       });
     });
+    describe('course-enrollment', function() {
+      it('when not enrolled, there should be an enroll button', async function() {
+        await driver.get(loginURL);
+        await driver.sleep(20000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
 
+        await driver.findElement(By.linkText('Enrollment Test Course'));
+        const buttonText = await driver.findElement(By.id('submitButton')).getText();
+        await driver.get(logoutURL);
+
+        expect(buttonText).to.equal('Enroll')
+      });
+      it('when enrolled, the button should be a withdraw button', async function() {
+        await driver.get(loginURL);
+        await driver.sleep(20000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+
+        await driver.findElement(By.linkText('Enrollment Test Course'));
+        await driver.findElement(By.id('submitButton')).click();
+        await driver.sleep(4000);
+        const testURL = await driver.getCurrentUrl();
+
+        await driver.findElement(By.linkText('Enrollment Test Course'));
+        const buttonText = await driver.findElement(By.id('submitButton')).getText();
+        await driver.get(logoutURL);
+
+        expect(buttonText).to.equal('Withdraw');
+        expect(testURL).to.equal(attMain);
+
+      });
+    })
     // email paths
     describe('no-users-enrolled', async () => {
       await driver.get(loginURL);
