@@ -3,7 +3,7 @@
 
 <head>
   <%- include ('../partials/header.ejs') %>
-
+  <%- include ('../partials/selectizeHeader.ejs') %>
 </head>
 
 <body>
@@ -28,6 +28,64 @@
 
 </body>
 <script>
+  $('#tags').selectize({
+      persist: false,
+      maxItems: null,
+      valueField: 'tag',
+      searchField: ['tag'],
+      options: [
+        <% for (tag of allTags) { %>
+          {tag: '<%=tag %>'},
+        <% } %>
+      ],
+      <% if (curTags.length != 0) { %>
+        items: [
+          <% for (tag of curTags) { %>
+            '<%=tag%>',
+          <% } %>
+        ],
+      <% } %>
+      render: {
+          item: function(item, escape) {
+              return '<div>' +
+                  (item.tag ? '<span class="tag">' + escape(item.tag) + '</span>' : '') +
+              '</div>';
+          },
+          option: function(item, escape) {
+              var label = item.tag;
+              return '<div>' +
+                  '<span class="label">' + escape(label) + '</span>' +
+              '</div>';
+          }
+      },
+      createFilter: function(input) {
+          var match, regex;
+
+          regex = new RegExp('^.{1,30}$', 'i');
+          match = input.match(regex);
+          if (match) return !this.options.hasOwnProperty(match[0]);
+
+
+          return false;
+      },
+      create: function(input) {
+          if ((new RegExp('^.{1,30}$', 'i')).test(input)) {
+              return {tag: input};
+          }
+          var match = input.match(new RegExp('^.{1,30}$', 'i'));
+          if (match) {
+              return {
+                  tag : match[0],
+              };
+          }
+          alert('Invalid Input');
+          return false;
+      }
+  });
+
+
+
+
   //identical to the script from newCourse.ejs except numSessions does not necessarily start at 1
   //handy materials
   let numSessions = document.getElementById('sessionTracker').value;

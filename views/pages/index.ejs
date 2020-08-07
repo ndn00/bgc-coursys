@@ -8,9 +8,9 @@
 <body>
 
   <% if (isOrganizer) { %>
-    <%- include('../partials/orgNav.ejs') %>
+  <%- include('../partials/orgNav.ejs') %>
   <% } else { %>
-    <%- include('../partials/nav.ejs') %>
+  <%- include('../partials/nav.ejs') %>
   <% } %>
 
 
@@ -22,60 +22,75 @@
           <!--<i class="material-icons">event</i>-->
         </h2>
       </div>
-      <div class="col-5">
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search Courses" aria-label="Search Courses"
-            aria-describedby="basic-addon2">
-          <div class="input-group-append">
-            <button class="btn btn-sm btn-outline-dark justify-content-center" type="button">
-              <i class="material-icons md-24">search</i>
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
-    <div class="row justify-content-center">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Course Name</th>
-            <th scope="col">Topic</th>
-            <th scope="col">Location</th>
-            <th scope="col">Sessions</th>
-            <th scope="col">Registration Deadline</th>
-            <th scope="col">Next Session</th>
-            <th scope="col">Seats</th>
-            <th scope="col">Status</th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- row template -->
-          <% data.forEach((item, index) => { %>
-          <tr class="visibleCourses">
-            <th scope="row"><%=index+1 %></th>
-            <td><a href=<%= '/courses/' + item.id %>><%= item.title %></a></td>
-            <td><%= item.topic %></td>
-            <td><%= item.delivery %></td>
-            <td><%= item.sessions %></td>
-            <td><%= item.time %></td>
-            <td><%= item.nextSession %></td>
-            <% if (item.position > item.maxSeats) { %>
-              <td><%= item.seats %>/<%= item.maxSeats %> [<%= (item.position-item.maxSeats) %>]</td>
-            <% } else { %>
-              <td><%= item.seats %>/<%= item.maxSeats %></td>
-            <% } %>
-            <td><%= item.status %></td>
-            <td>
-              <a href=<%= '/courses/' + item.id %>><i class="material-icons md-24">visibility</i></a>
-            </td>
-          </tr>
-          <% }); %>
-        </tbody>
-      </table>
-    </div>
+    <table id="tb" class="table table-striped col-12" data-toggle="table" data-pagination="true" data-search="true">
+      <thead>
+        <tr>
+          <th class="d-none" scope="col" data-field="id" data-sortable="false"></th>
+          <th scope="col" data-field="title" data-sortable="true">Course Name</th>
+          <th scope="col" data-field="topic" data-sortable="true">Topic</th>
+          <th scope="col" data-field="delivery" data-sortable="true">Location</th>
+          <th scope="col" data-field="sessions" data-sortable="true">Sessions</th>
+          <th scope="col" data-field="rdeadline" data-sortable="true">Registration Deadline</th>
+          <th scope="col" data-field="nextSession" data-sortable="true">Next Session</th>
+          <th scope="col" data-field="seats" data-sortable="true">Seats</th>
+          <th scope="col" data-field="status" data-sortable="true">Status</th>
+          <th scope="col" data-field="tags" data-sortable="true" data-visible="false">Tags</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.forEach((item, index) => { %>
+        <tr>
+          <th class="d-none" id=<%= item.id %>><%= item.id %></th>
+          <td><%= item.title %></td>
+          <td><%= item.topic %></td>
+          <td><%= item.delivery %></td>
+          <td><%= item.sessions %></td>
+          <td><%= item.time %></td>
+          <td><%= item.nextSession %></td>
+          <% if (item.position > item.maxSeats) { %>
+          <td><%= item.seats %>/<%= item.maxSeats %> [<%= (item.position-item.maxSeats) %>]</td>
+          <% } else { %>
+          <td><%= item.seats %>/<%= item.maxSeats %></td>
+          <% } %>
+          <td><%= item.status %></td>
+          <td><%= item.tags %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
   </div>
+  <script src="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.js"></script>
+  <script>
+    function handleCellClick(event, field, value, row, $element) {
+      // console.log(field);
+      $(location).attr('href', '/courses/' + row.id);
+    }
+    function addRow(course) {
+      $("#tb").bootstrapTable('insertRow', {
+        index: 0,
+        row: {
+          id: course.id,
+          title: course.title,
+          topic: course.topic,
+          delivery: course.delivery,
+          sessions: course.sessions,
+          seats: (course.seats + "/" + course.maxSeats),
+          rdeadline: course.rdeadline,
+          status: course.status || 'N/A',
+          tags: course.tags,
+          modify: '<i class="btn p-0 m-0 material-icons md-36">edit</i>'
+        }
+      });
+    }
+    $("#tb").on('click-cell.bs.table', handleCellClick);
+
+    socket.on('addedcourse', (data) => {
+      console.log(data.course);
+      location.reload(true);
+      // addRow(data.course);
+    });
+  </script>
 </body>
 
 </html>

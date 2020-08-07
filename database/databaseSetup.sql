@@ -10,9 +10,9 @@ ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFE
 
 
 CREATE TABLE course_sessions (
-	course_id 	 INTEGER NOT NULL,
+	course_id 	 	 INTEGER NOT NULL,
 	session_start	 TIMESTAMP,
-	session_end	 TIMESTAMP,
+	session_end	 	 TIMESTAMP,
 	session_name	 varchar,
 	FOREIGN KEY (course_id) REFERENCES courses
 		ON DELETE CASCADE
@@ -32,7 +32,7 @@ CREATE TABLE courses (
 	course_name	 VARCHAR(30),
 	topic		 VARCHAR(30),
 	location	 VARCHAR(30),
-	seat_capcity	 INTEGER NOT NULL,
+	seat_capacity	 INTEGER NOT NULL,
 	description	 VARCHAR,
 	course_deadline	 TIMESTAMP,
 	sessions	 SMALLINT
@@ -48,3 +48,9 @@ CREATE TABLE enrollment (
 		ON DELETE CASCADE
 );
 
+CREATE TABLE tags (
+	course_id	 INTEGER NOT NULL,
+	tag			 VARCHAR(30),
+	FOREIGN KEY (course_id) REFERENCES courses
+		ON DELETE CASCADE		
+);
