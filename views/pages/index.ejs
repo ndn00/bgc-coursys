@@ -49,12 +49,12 @@
           <td><%= item.time %></td>
           <td><%= item.nextSession %></td>
           <% if (item.position > item.maxSeats) { %>
-          <td><%= item.seats %>/<%= item.maxSeats %> [<%= (item.position-item.maxSeats) %>]</td>
+          <td id=<%=item.id.toString() + 'seats'><%= item.seats %>/<%= item.maxSeats %> [<%= (item.position-item.maxSeats) %>]</td>
           <% } else { %>
-          <td><%= item.seats %>/<%= item.maxSeats %></td>
+          <td id=<%=item.id.toString() + 'seats'><%= item.seats %>/<%= item.maxSeats %></td>
           <% } %>
-          <td><%= item.status %></td>
-          <td><%= item.tags %></td>
+          <td id=<%=item.id.toString() + 'status'%>><%= item.status %></td>
+          <td id=<%=item.id.toString() + 'tags'><%= item.tags %></td>
         </tr>
         <% }); %>
       </tbody>

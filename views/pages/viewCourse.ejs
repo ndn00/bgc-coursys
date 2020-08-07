@@ -56,11 +56,11 @@
   <div class="row">
     <% if (!isEnrolled) { %>
       <form action="/courses/enroll/<%= id %>" method="POST">
-        <input type="submit" class="btn btn-dark" value="Enroll">
+        <input type="submit" class="btn btn-dark" value="Enroll" id="enroll">
       </form>
     <% } else { %>
       <form action="/courses/withdraw/<%= id %>" method="POST">
-        <input type="submit" class="btn btn-dark" value="Withdraw">
+        <input type="submit" class="btn btn-dark" value="Withdraw" id="withdraw">
       </form>
     <% } %>
   </div>

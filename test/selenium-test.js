@@ -6,6 +6,8 @@ let { Builder, By, Key, until } = require('selenium-webdriver');
 let chai = require('chai');
 let expect = chai.expect;
 
+const database = require('../database');
+
 const loginURL = 'https://cmpt276-bgc-coursys.herokuapp.com/login';
 const logoutURL = 'https://cmpt276-bgc-coursys.herokuapp.com/logout';
 const localLogin = 'localhost:5000/login';
@@ -560,10 +562,102 @@ describe('login-interactions', function() {
       expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/main');
       // should check mla283@sfu.ca's inbox to see email received
     });
+
+ 
+    describe('add-tags', async () => {
+      await drive.get(loginURL);
+      await (await driver).sleep(20000);
+  
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      
+      await driver.get('http://cmpt276-bgc-coursys.herokuapp.com/courses/new');
+  
+      //dummy course data
+      await driver.findElement(By.id('coursename')).sendKeys('Test Course');
+      await driver.findElement(By.id('topic')).sendKeys('Test');
+      await driver.findElement(By.id('capacity')).sendKeys('20');
+      await driver.findElement(By.id('location')).sendKeys("Meeting Room");
+  
+      //August 20, 2020, 11:59 pm
+      await driver.findElement(By.id('deadline')).sendKeys('2020\t0820');
+  
+      //create session on September 1, 10 AM - 12 PM
+      await driver.findElement(By.id('sessionDate1')).sendKeys('2020\t0901');
+      await driver.findElement(By.id('startTime1')).sendKeys('10:00A');
+      await driver.findElement(By.id('endTime1')).sendKeys('12:00P');
+      await driver.findElement(By.id('tags')).sendKeys('leadership');
+  
+      await driver.findElement(By.id('submitButton')).click();
+  
+      await driver.get('http://cmpt276-bgc-coursys.herokuapp.com/main');
+      const message = await driver.findElement(By.id('5tags')).getText();
+  
+      await driver.get(logoutURL);
+  
+      expect(message2).to.equal('leadership');
+  
+    });
+    
+    
+    describe('get-status', async () => {
+      await drive.get(loginURL);
+      await (await driver).sleep(20000);
+  
+      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('http://cmpt276-bgc-coursys.herokuapp.com/courses/new');
+  
+      //dummy course data
+      await driver.findElement(By.id('coursename')).sendKeys('Small Course');
+      await driver.findElement(By.id('topic')).sendKeys('Test');
+      await driver.findElement(By.id('capacity')).sendKeys('1');
+      await driver.findElement(By.id('location')).sendKeys("Meeting Room");
+  
+      //August 20, 2020, 11:59 pm
+      await driver.findElement(By.id('deadline')).sendKeys('2020\t0820');
+  
+      //create session on September 1, 10 AM - 12 PM
+      await driver.findElement(By.id('sessionDate1')).sendKeys('2020\t0901');
+      await driver.findElement(By.id('startTime1')).sendKeys('10:00A');
+      await driver.findElement(By.id('endTime1')).sendKeys('12:00P');
+      await driver.findElement(By.id('tags')).sendKeys('leadership');
+  
+      await driver.findElement(By.id('submitButton')).click();
+  
+      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/6');
+  
+      await driver.findElement(By.id('enroll'))
+  
+      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/main');
+      const message = await driver.findElement(By.id('6status')).getText();
+  
+      await driver.get(logoutURL);
+  
+      expect(message).to.equal('Enrolled');
+  
+      await drive.get(loginURL);
+  
+      await driver.findElement(By.name('uname')).sendKeys('mla283@sfu.ca');
+      await driver.findElement(By.name('pwd')).sendKeys('Password123!');
+      await driver.findElement(By.id('loginSubmit')).click();
+      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/6');
+  
+      await driver.findElement(By.id('enroll'))
+  
+      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/main');
+      const message2 = await driver.findElement(By.id('6status')).getText();
+      const message3 = await driver.findElement(By.id('6seats')).getText();
+  
+      await driver.get(logoutURL);
+  
+      expect(message2).to.equal('Waitlisted');
+      expect(message3).to.equal('2/1 [1]');
+    });
 });
 
 
-
-
-  after(async () => driver.quit());
+after(async () => driver.quit());
 });
