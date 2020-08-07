@@ -23,7 +23,8 @@
         </h2>
       </div>
     </div>
-    <table id="tb" class="table table-striped col-12" data-toggle="table" data-pagination="true" data-search="true">
+    <table id="tb" class="table table-striped col-12" data-toggle="table" data-pagination="true" data-search="true"
+      data-unique-id="id">
       <thead>
         <tr>
           <th class="d-none" scope="col" data-field="id" data-sortable="false"></th>
@@ -48,11 +49,15 @@
           <td><%= item.sessions %></td>
           <td><%= item.time %></td>
           <td><%= item.nextSession %></td>
-          <% if (item.position > item.maxSeats) { %>
+          <td>
+            <%= (item.seats > item.maxSeats) ? item.maxSeats + "/" + item.maxSeats
+            + ((item.position > item.maxSeats) ? " [" + (item.position - item.maxSeats) + "]" : "") : item.seats + "/" + item.maxSeats %>
+          </td>
+          <!-- <% if (item.seats > item.maxSeats) { %>
           <td><%= item.seats %>/<%= item.maxSeats %> [<%= (item.position-item.maxSeats) %>]</td>
           <% } else { %>
           <td><%= item.seats %>/<%= item.maxSeats %></td>
-          <% } %>
+          <% } %> -->
           <td><%= item.status %></td>
           <td><%= item.tags %></td>
         </tr>
@@ -67,6 +72,9 @@
       $(location).attr('href', '/courses/' + row.id);
     }
     function addRow(course) {
+      if (course.position > course.maxSeats) {
+        // handle waitlist
+      }
       $("#tb").bootstrapTable('insertRow', {
         index: 0,
         row: {
@@ -75,6 +83,7 @@
           topic: course.topic,
           delivery: course.delivery,
           sessions: course.sessions,
+          nextSession: course.nextSession,
           seats: (course.seats + "/" + course.maxSeats),
           rdeadline: course.rdeadline,
           status: course.status || 'N/A',
@@ -83,13 +92,56 @@
         }
       });
     }
-    $("#tb").on('click-cell.bs.table', handleCellClick);
-
-    socket.on('addedcourse', (data) => {
-      console.log(data.course);
+    function removeRow(id) {
+      $("#tb").bootstrapTable('removeByUniqueId', id);
+    }
+    function updateCourse(id, course) {
+      var seats = (course.seats > course.maxSeats) ? course.maxSeats + "/" + course.maxSeats
+        + ((course.position > course.maxSeats) ? " [" + (course.position - course.maxSeats) + "]" : "") : course.seats + "/" + course.maxSeats;
+      var status = (course.position > 0) ? ((course.position > course.maxSeats) ? "Waitlisted" : "Enrolled") : "Open";
+      $("#tb").bootstrapTable('updateByUniqueId', {
+        id: id,
+        row: {
+          id: course.id,
+          title: course.title,
+          topic: course.topic,
+          delivery: course.delivery,
+          sessions: course.sessions,
+          nextSession: course.nextSession,
+          seats: seats,
+          rdeadline: course.rdeadline,
+          status: status,
+        }
+      });
+    }
+    // force reload when using back button
+    if (performance.navigation.type == 2) {
       location.reload(true);
-      // addRow(data.course);
-    });
+    }
+    window.onload = () => {
+      $("#tb").on('click-cell.bs.table', handleCellClick);
+
+      socket.on('courseAdd', (data) => {
+        console.log(data.course);
+        // location.reload(true);
+        if (data.course.status = 'Open') { addRow(data.course); }
+      });
+      socket.on('courseDelete', (data) => {
+        removeRow(data.courseID);
+      });
+      socket.on('courseEnroll', (data) => {
+        jQuery.getJSON("/coursedata/" + data.courseID, (response, status) => {
+          console.log(response);
+          updateCourse(data.courseID, response);
+        });
+      });
+      socket.on('courseWithdraw', (data) => {
+        jQuery.getJSON("/coursedata/" + data.courseID, (response, status) => {
+          console.log(response);
+          updateCourse(data.courseID, response);
+        });
+      });
+    }
   </script>
 </body>
 

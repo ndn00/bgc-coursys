@@ -18,7 +18,8 @@
         </h2>
       </div>
     </div>
-    <table id="tb" class="table table-striped col-12" data-toggle="table" data-pagination="true" data-search="true">
+    <table id="tb" class="table table-striped col-12" data-toggle="table" data-pagination="true" data-search="true"
+      data-unique-id="id">
       <thead>
         <tr>
           <th class="d-none" scope="col" data-field="id" data-sortable="false"></th>
@@ -77,13 +78,52 @@
         }
       });
     }
-    $("#tb").on('click-cell.bs.table', handleCellClick);
-
-    socket.on('addedcourse', (data) => {
-      console.log(data.course);
+    function removeRow(id) {
+      $("#tb").bootstrapTable('removeByUniqueId', id);
+    }
+    function updateCourse(id, course) {
+      $("#tb").bootstrapTable('updateByUniqueId', {
+        id: id,
+        row: {
+          id: course.id,
+          title: course.title,
+          topic: course.topic,
+          delivery: course.delivery,
+          sessions: course.sessions,
+          seats: (course.seats + "/" + course.maxSeats),
+          rdeadline: course.rdeadline,
+          status: course.status || 'N/A',
+          modify: '<i class="btn p-0 m-0 material-icons md-36">edit</i>'
+        }
+      })
+    }
+    // force reload when using back button
+    if (performance.navigation.type == 2) {
       location.reload(true);
-      // addRow(data.course);
-    });
+    }
+    window.onload = () => {
+      $("#tb").on('click-cell.bs.table', handleCellClick);
+      socket.on('courseAdd', (data) => {
+        console.log(data.course);
+        // location.reload(true);
+        addRow(data.course);
+      });
+      socket.on('courseDelete', (data) => {
+        removeRow(data.courseID);
+      });
+      socket.on('courseEnroll', (data) => {
+        jQuery.getJSON("/coursedata/" + data.courseID, (response, status) => {
+          console.log(response);
+          updateCourse(data.courseID, response);
+        });
+      });
+      socket.on('courseWithdraw', (data) => {
+        jQuery.getJSON("/coursedata/" + data.courseID, (response, status) => {
+          console.log(response);
+          updateCourse(data.courseID, response);
+        });
+      });
+    }
   </script>
 </body>
 

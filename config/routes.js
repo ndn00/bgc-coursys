@@ -41,6 +41,8 @@ module.exports = (app, passport, database) => {
   app.get('/courses/edit/:id', auth.requiresOrganizer, courses.renderEditCourse);
   app.post('/courses/edit/:id', auth.requiresOrganizer, courses.editCourse);
 
+  app.get('/coursedata/:id', auth.requiresLogin, courses.getCourseData);
+
   //add additional routes that require authentication to access, else they will be redirected to login
   //view course details -> need identifier
   //edit course details -> need identifier
