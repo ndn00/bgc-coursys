@@ -488,6 +488,22 @@ describe('login-interactions', function() {
         const capacity = parseInt(driver.findElement(By.id('capacity')).getText(), 10);
         await driver.get(logoutURL)
         expect(enrolled.length).to.be.below(capacity)
+      });
+      it('when there is a waitlist, number of waitlisted users + number of enrolled users should be more than the seat capacity', async function() {
+        await driver.get(loginURL);
+        await driver.sleep(1000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+        await driver.get(orgMain);
+
+        await driver.findElement(By.linkText("Waitlist Course")).click();
+        const enrolled = await driver.findElements(By.className('enrolledUsers')).length;
+        const waitlist = await driver.findElements(By.className('waitlistUsers')).length;
+        const capacity = parseInt(driver.findElement(By.id('capacity')).getText(), 10);
+        await driver.get(logoutURL);
+
+        expect(waitlist + enrolled).to.be.above(capacity);
       })
     });
 
@@ -528,13 +544,19 @@ describe('login-interactions', function() {
         await driver.get(attendeeMain);
         let moreByOne = await driver.findElements(By.className('visibleCourses')).length;
 
+        //delete the course
+        await driver.get(orgMain);
+        await driver.findElement(By.linkText('Test Integration Course')).click();
+        await driver.findElement(By.name('delCourse')).click();
+        await driver.switchTo().alert().sendKeys('Please delete this course.');
+        await driver.switchTo().alert().accept();
+        await driver.sleep(3000);
+
         await driver.get(logoutURL);
         expect(initCourses).to.equal(shouldBeSame);
         expect(moreByOne).to.be.above(initCourses);
-
-
       });
-    })
+    });
 
     // email paths
     describe('no-users-enrolled', async () => {
