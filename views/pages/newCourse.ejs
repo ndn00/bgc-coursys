@@ -19,9 +19,7 @@
         <%- include ('../partials/courseForm.ejs') %>
 
         <input type="number" id="sessionTracker" name="sessionTracker" value=<%= sessionNum %>>
-        <input type="submit" class="btn btn-dark" value="Submit">
-
-        
+        <input type="submit" id="submitButton" class="btn btn-dark" value="Submit">
       </form>
     </div>
   </div>
@@ -63,7 +61,7 @@ $('#tags').selectize({
       createFilter: function(input) {
           var match, regex;
 
-          regex = new RegExp('^.+$', 'i');
+          regex = new RegExp('^.{1,30}$', 'i');
           match = input.match(regex);
           if (match) return !this.options.hasOwnProperty(match[0]);
 
@@ -71,10 +69,10 @@ $('#tags').selectize({
           return false;
       },
       create: function(input) {
-          if ((new RegExp('^.+$', 'i')).test(input)) {
+          if ((new RegExp('^.{1,30}$', 'i')).test(input)) {
               return {tag: input};
           }
-          var match = input.match(new RegExp('^.+$', 'i'));
+          var match = input.match(new RegExp('^.{1,30}$', 'i'));
           if (match) {
               return {
                   tag : match[0],

@@ -282,16 +282,19 @@ module.exports = {
 		// https://github.com/sendgrid/sendgrid-nodejs
 		sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 		try {
-			let getEmails =
-			`SELECT u.email FROM users u, enrollment e, courses c
-			WHERE c.id=e.course_id and e.user_id=u.id and c.id=${req.params.id};`;
 			let getCourseInfo =
 			`SELECT * FROM courses WHERE id=${req.params.id};`;
+			let courseInfo = await database.query(getCourseInfo);
+			let capacity = courseInfo.rows[0].seat_capacity;
+			let getEmails =
+			`SELECT u.email FROM users u, enrollment e, courses c
+			WHERE c.id=e.course_id and e.user_id=u.id and c.id=${req.params.id}
+			ORDER BY e.time ASC
+			LIMIT ${capacity};`;
 			let getNextSession =
 			`SELECT * FROM course_sessions WHERE course_id=${req.params.id} AND
 			session_start >= CURRENT_DATE ORDER BY session_start ASC;`
 			let emails = await database.query(getEmails);
-			let courseInfo = await database.query(getCourseInfo);
 			let nextDate = await database.query(getNextSession);
 			courseInfo = courseInfo.rows;
 			nextDate = nextDate.rows[0].session_start;
