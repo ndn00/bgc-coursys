@@ -49,10 +49,12 @@ module.exports = {
     let queryCourse = `
     SELECT
     id, course_name, topic, location, sessions, course_deadline,
-    seat_capacity, enabled, count(e.user_id) AS seats, min(cs.session_start) AS next_sess
+    seat_capacity, enabled, count(e.user_id) AS seats, min(cs.session_start) AS next_sess,
+    STRING_AGG(t.tag, ', ') AS tagstring
     FROM courses
     LEFT JOIN enrollment e ON e.course_id = id
     LEFT JOIN course_sessions cs ON cs.course_id = id
+    LEFT JOIN tags t ON t.course_id = id
     WHERE course_deadline >= CURRENT_DATE AND enabled=true AND cs.session_start >= CURRENT_TIMESTAMP
     GROUP BY id
     ORDER BY course_deadline ASC;`
@@ -97,7 +99,8 @@ module.exports = {
                       position: (positionMap[dbRes.rows[row].id]) ? positionMap[dbRes.rows[row].id] : '?',
                       seats: dbRes.rows[row].seats,
                       maxSeats: dbRes.rows[row].seat_capacity,
-                      status: (positionMap[dbRes.rows[row].id]) ? (positionMap[dbRes.rows[row].id] > dbRes.rows[row].seat_capacity) ? "Waitlisted" : "Enrolled" : "Open"
+                      status: (positionMap[dbRes.rows[row].id]) ? (positionMap[dbRes.rows[row].id] > dbRes.rows[row].seat_capacity) ? "Waitlisted" : "Enrolled" : "Open",
+                      tags: dbRes.rows[row].tagstring
                   }
                 );
               }
