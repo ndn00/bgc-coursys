@@ -50,7 +50,7 @@ module.exports = {
     let queryCourse = `
     SELECT
     id, course_name, topic, location, sessions, course_deadline,
-    seat_capacity, enabled, count(e.user_id) AS seats, min(cs.session_start) AS next_sess,
+    seat_capacity, enabled, count(distinct e.user_id) AS seats, min(cs.session_start) AS next_sess,
     STRING_AGG(t.tag, ', ') AS tagstring
     FROM courses
     LEFT JOIN enrollment e ON e.course_id = id
@@ -74,7 +74,7 @@ module.exports = {
         if (errOutDB) {
           return result.send("Error querying db on landing/main");
         } else {
-          //console.log(dbRes);
+          console.log(dbRes);
           database.query(queryPosition, [request.user.id], (posError, posRes) => {
             if (posError) {
               return result.send("Error querying position");

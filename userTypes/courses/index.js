@@ -16,7 +16,7 @@ module.exports = {
     let queryCourse = `
     SELECT
     id, course_name, topic, location, sessions, course_deadline,
-    seat_capacity, enabled, count(e.user_id) AS seats, min(cs.session_start) AS next_sess
+    seat_capacity, enabled, count(distinct e.user_id) AS seats, min(cs.session_start) AS next_sess
     FROM courses
     LEFT JOIN enrollment e ON e.course_id = id
     LEFT JOIN course_sessions cs ON cs.course_id = id
