@@ -41,7 +41,7 @@
     </thead>
     <tbody id="session-rows" class="table-active">
       <% sessions.forEach((item, index) => { %>
-      <tr id=<%= 'session' + (index + 1) %>>
+      <tr class="sessionRow" id=<%= 'session' + (index + 1) %>>
         <td>
           <input type="text" class="form-control" id=<%= 'sessionName' + (index + 1) %>
             name=<%= 'sessionName' + (index + 1) %> value=<%= item.name %>>
