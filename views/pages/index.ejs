@@ -53,7 +53,7 @@
         <tbody>
           <!-- row template -->
           <% data.forEach((item, index) => { %>
-          <tr>
+          <tr class="visibleCourses">
             <th scope="row"><%=index+1 %></th>
             <td><a href=<%= '/courses/' + item.id %>><%= item.title %></a></td>
             <td><%= item.topic %></td>

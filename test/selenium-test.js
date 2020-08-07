@@ -8,6 +8,8 @@ let expect = chai.expect;
 
 const loginURL = 'https://cmpt276-bgc-coursys.herokuapp.com/login';
 const logoutURL = 'https://cmpt276-bgc-coursys.herokuapp.com/logout';
+const attMain = 'https://cmpt276-bgc-coursys.herokuapp.com/main';
+const orgMain = 'https://cmpt276-bgc-coursys.herokuapp.com/organizer/main';
 const localLogin = 'localhost:5000/login';
 const localLogout = 'localhost:5000/logout';
 
@@ -96,7 +98,7 @@ describe('login-interactions', function() {
     expect(errorMessage).to.equal('Authentication error (incorrect email or password).');
 
   });
-  it('should return the landing page (/organizer/main) for a correctly authenticated organizer user', async function() {
+  it('should return the landing page (/main) for a correctly authenticated organizer user', async function() {
     await driver.get(loginURL);
     await driver.sleep(2000);
     await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
@@ -104,7 +106,7 @@ describe('login-interactions', function() {
     await driver.findElement(By.id('loginSubmit')).click();
     const curURL = await driver.getCurrentUrl();
 
-    expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/organizer/main');
+    expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/main');
     await driver.get(logoutURL);
   });
   it('should return the landing page (/main) for a correctly authenticated attendee user', async function() {
@@ -121,7 +123,7 @@ describe('login-interactions', function() {
   it('should return the login page after logging out');
 
   describe('main-menu', function() {
-    it('sidebar should contain four elements for attendee user', async function() {
+    it('sidebar should contain three elements for attendee user', async function() {
       await driver.get(loginURL);
       await driver.sleep(1000);
       await driver.findElement(By.name('uname')).sendKeys('test-attendee@bgcengineering.ca');
@@ -130,7 +132,7 @@ describe('login-interactions', function() {
 
       const links = await driver.findElements(By.className('nav-item'));
       await driver.get(logoutURL);
-      expect(links.length).to.equal(4);
+      expect(links.length).to.equal(3);
     });
     it('sidebar should contain four elements for organizer user', async function() {
       await driver.get(loginURL);
@@ -405,6 +407,7 @@ describe('login-interactions', function() {
         expect(title).to.be.a('string').that.is.not.empty;
 
       });
+      /*
       it('For a valid course, the topic must be present', async function() {
         await driver.get(loginURL);
         await driver.sleep(1000);
@@ -417,7 +420,7 @@ describe('login-interactions', function() {
         await driver.get(logoutURL);
         expect(topic).to.be.a('string').that.is.not.empty;
 
-      });
+      });*/
       it("For a valid course, the location must be present", async function() {
         await driver.get(loginURL);
         await driver.sleep(1000);
@@ -446,27 +449,95 @@ describe('login-interactions', function() {
     });
 
     //course editing
-    describe('local-course-editing', function() {
+    describe('course-editing', function() {
+      it('should render course information in the proper fields', async function() {
+        await driver.get(loginURL);
+        await driver.sleep(1000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+        await driver.get(orgMain);
+        //important: make sure there is a course called "Test Course" that has been created
 
+        await driver.findElement(By.linkText("Test Course")).click()
+        const name = await driver.findElement(By.id('coursename')).getText()
+        const capacity = parseInt(driver.findElement(By.id('capacity')).getText(), 10)
+        const location = await driver.findElement(By.id('location')).getText();
+        const deadDate = await driver.findElement(By.id('deadline')).getText();
+        const deadTime = await driver.findElement(By.id('deadTime')).getText();
+        const sessions = await driver.findElements(By.className('sessionRow'));
+        await driver.get(logoutURL);
+        expect(name).to.be.a('string').that.is.not.empty;
+        expect(loaction).to.be.a('string').that.is.not.empty;
+        expect(capacity).to.be.above(0);
+        expect(deadDate).to.be.a('string').that.is.not.empty;
+        expect(deadTime).to.be.a('string').that.is.not.empty;
+        expect(sessions).to.have.lengthOf.at.least(1);
+      });
+      it('number of enrolled users should be less than or equal to the seat capacity', async function() {
+        await driver.get(loginURL);
+        await driver.sleep(1000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+        await driver.get(orgMain);
+        //important: make sure there is a course called "Test Course" that has been created
+
+        await driver.findElement(By.linkText("Test Course")).click();
+        const enrolled = await driver.findElements(By.className('enrolledUsers'));
+        const capacity = parseInt(driver.findElement(By.id('capacity')).getText(), 10);
+        await driver.get(logoutURL)
+        expect(enrolled.length).to.be.below(capacity)
+      })
     });
+
+    describe('course-integration-testing', function() {
+      it('creating a course without accepting registration should hide the course in /main. Enabling the course will allow registration, which increases the number of enrolled by 1', async function() {
+        await driver.get(loginURL);
+        await driver.sleep(1000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+
+        let initCourses = await driver.findElements(By.className('visibleCourses')).length;
+        await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/new');
+
+        await driver.findElement(By.id('coursename')).sendKeys('Test Integration Course');
+        //await driver.findElement(By.id('topic')).sendKeys('');
+        await driver.findElement(By.id('capacity')).sendKeys('20');
+        await driver.findElement(By.id('location')).sendKeys("Meeting Room");
+
+        //August 20, 2020, 11:59 pm
+        await driver.findElement(By.id('deadline')).sendKeys('2020\t0820');
+
+        //create session on September 2, 10 AM - 12 PM
+        await driver.findElement(By.id('sessionDate1')).sendKeys('2020\t0902');
+        await driver.findElement(By.id('startTime1')).sendKeys('10:00A');
+        await driver.findElement(By.id('endTime1')).sendKeys('12:00P');
+
+        await driver.findElement(By.id('submitButton')).click();
+        await driver.sleep(3000);
+        await driver.get(attendeeMain);
+        let shouldBeSame = await driver.findElements(By.className('visibleCourses')).length;
+
+        await driver.get(orgMain);
+        await driver.findElement(By.linkText('Test Integration Course')).click();
+        await driver.findElement(By.name('registration')).click()
+        await driver.findElement(By.id('submitButton')).click();
+        await driver.sleep(3000);
+        await driver.get(attendeeMain);
+        let moreByOne = await driver.findElements(By.className('visibleCourses')).length;
+
+        await driver.get(logoutURL);
+        expect(initCourses).to.equal(shouldBeSame);
+        expect(moreByOne).to.be.above(initCourses);
+
+
+      });
+    })
 
     // email paths
-    describe('no-users-enrolled', () => {
-      await driver.get(loginURL);
-      await driver.sleep(20000);
-      await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
-      await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
-      await driver.findElement(By.id('loginSubmit')).click();
-      await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/24');
-
-      await driver.findElement(By.id('emailConf')).click();
-      await driver.findElement(By.id('emailSendSubmit')).click();
-
-      const message = await driver.findElement(By.id('redirectMessage')).getText();
-      expect(message).to.equal('No users enrolled, no emails sent. You will be redirected to the course view.');
-    });
-
-    describe('no-users-enrolled', () => {
+    describe('no-users-enrolled', async () => {
       await driver.get(loginURL);
       await driver.sleep(20000);
       await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
@@ -482,7 +553,7 @@ describe('login-interactions', function() {
       expect(message).to.equal('No users enrolled, no emails sent. You will be redirected to the course view.');
     });
 
-    describe('email-success', () => {
+    describe('email-success', async () => {
       await driver.get(loginURL);
       await driver.sleep(20000);
       await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
@@ -518,7 +589,7 @@ describe('login-interactions', function() {
     //   expect(message).to.equal('ERROR: EMAIL NOT SENT! API failure. You will be redirected to the course view.');
     // });
 
-    describe('disable-user', () => {
+    describe('disable-user', async () => {
       await driver.get(loginURL);
       await driver.sleep(20000);
       await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
@@ -532,7 +603,7 @@ describe('login-interactions', function() {
       const message = await driver.findElement(By.id('redirectMessage')).getText();
       await driver.get(logoutURL);
       expect(message).to.equal('User data has been successfully updated! You will be redirected to the main courses page.');
-      
+
       await driver.get(loginURL);
       await driver.findElement(By.name('uname')).sendKeys('mla283@sfu.ca');
       await driver.findElement(By.name('pwd')).sendKeys('Password123!');
@@ -542,7 +613,7 @@ describe('login-interactions', function() {
       expect(curURL).to.equal('https://cmpt276-bgc-coursys.herokuapp.com/login');
     });
 
-    describe('approve-user', () => {
+    describe('approve-user', async () => {
       await driver.get(loginURL);
       await driver.sleep(20000);
       await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
@@ -556,7 +627,7 @@ describe('login-interactions', function() {
       const message = await driver.findElement(By.id('redirectMessage')).getText();
       await driver.get(logoutURL);
       expect(message).to.equal('User data has been successfully updated! You will be redirected to the main courses page.');
-      
+
       await driver.get(loginURL);
       await driver.findElement(By.name('uname')).sendKeys('mla283@sfu.ca');
       await driver.findElement(By.name('pwd')).sendKeys('Password123!');
