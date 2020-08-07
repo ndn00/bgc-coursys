@@ -60,7 +60,7 @@
       if (field == "modify")
         $(location).attr('href', '/courses/edit/' + row.id);
       else
-        $(location).attr('href', '/courses/' + row.id);
+        $(location).attr('href', '/courses/edit/' + row.id);
     }
     function addRow(course) {
       $("#tb").bootstrapTable('insertRow', {
