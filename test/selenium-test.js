@@ -525,6 +525,7 @@ describe('login-interactions', function() {
 
         //August 20, 2020, 11:59 pm
         await driver.findElement(By.id('deadline')).sendKeys('2020\t0820');
+        await driver.findElement(By.id('deadTime')).sendKeys('11:59P');
 
         //create session on September 2, 10 AM - 12 PM
         await driver.findElement(By.id('sessionDate1')).sendKeys('2020\t0902');
@@ -558,11 +559,78 @@ describe('login-interactions', function() {
         expect(moreByOne).to.be.above(initCourses);
         expect(testURL).to.equal(orgMain);
       });
+      it('Creating a 1-seat course, enrolling, enrolling a separate user, withdrawing the original user, then attempting to enroll the original user will result in that user put on the waitlist', async function() {
+        await driver.get(loginURL);
+        await driver.sleep(1000);
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+
+        await driver.get('https://cmpt276-bgc-coursys.herokuapp.com/courses/new');
+        await driver.findElement(By.id('coursename')).sendKeys('Waitlist Bop Course');
+        //await driver.findElement(By.id('topic')).sendKeys('');
+        await driver.findElement(By.id('capacity')).sendKeys('1');
+        await driver.findElement(By.id('location')).sendKeys("Meeting Room");
+
+        //August 20, 2020, 11:59 pm
+        await driver.findElement(By.id('deadline')).sendKeys('2020\t0820');
+        await driver.findElement(By.id('deadTime')).sendKeys('11:59P');
+
+
+        //create session on September 2, 10 AM - 12 PM
+        await driver.findElement(By.id('sessionDate1')).sendKeys('2020\t0902');
+        await driver.findElement(By.id('startTime1')).sendKeys('10:00A');
+        await driver.findElement(By.id('endTime1')).sendKeys('12:00P');
+
+        await driver.findElement(By.name('registration')).click();
+        await driver.findElement(By.id('submitButton')).click();
+
+        await driver.sleep(4000);
+        await driver.findElement(By.linkText('Waitlist Bop Course')).click();
+        const buttonText1 = await driver.findElement(By.id('submitButton')).getText();
+        await driver.findElement(By.id('submitButton')).click();
+        await driver.sleep(4000);
+        await driver.get(logoutURL);
+        await driver.sleep(4000);
+
+        await driver.findElement(By.name('uname')).sendKeys('test-attendee@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('11111111aA');
+        await driver.findElement(By.id('loginSubmit')).click();
+        await driver.findElement(By.linkText('Waitlist Bop Course')).click();
+        const buttonText2 = await driver.findElement(By.id('submitButton')).getText();
+        await driver.findElement(By.id('submitButton')).click();
+        await driver.sleep(4000);
+        await driver.get(logoutURL);
+        await driver.sleep(4000);
+
+        await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
+        await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
+        await driver.findElement(By.id('loginSubmit')).click();
+
+        await driver.findElement(By.linkText('Waitlist Bop Course')).click();
+        const buttonText3 = await driver.findElement(By.id('submitButton')).getText();
+        await driver.findElement(By.id('submitButton')).click();
+        await driver.sleep(4000);
+
+        await driver.findElement(By.linkText('Waitlist Bop Course')).click();
+        const buttonText4 = await driver.findElement(By.id('submitButton')).getText();
+        await driver.findElement(By.id('submitButton')).click();
+        const redirectText = await driver.findElement(By.id('redirectMessage')).getText();
+        await driver.sleep(4000);
+        await driver.get(logoutURL);
+
+        expect(buttonText1).to.equal("Enroll");
+        expect(buttonText2).to.equal("Enroll");
+        expect(buttonText3).to.equal("Withdraw");
+        expect(buttonText4).to.equal("Enroll");
+        expect(redirectText).to.equal("Added to waitlist for this course. You will be notified if you move off the waitlist. You will be redirected to the main page.");
+
+      });
     });
     describe('course-enrollment', function() {
       it('when not enrolled, there should be an enroll button', async function() {
         await driver.get(loginURL);
-        await driver.sleep(20000);
+        await driver.sleep(2000);
         await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
         await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
         await driver.findElement(By.id('loginSubmit')).click();
@@ -575,17 +643,17 @@ describe('login-interactions', function() {
       });
       it('when enrolled, the button should be a withdraw button', async function() {
         await driver.get(loginURL);
-        await driver.sleep(20000);
+        await driver.sleep(2000);
         await driver.findElement(By.name('uname')).sendKeys('test-organizer@bgcengineering.ca');
         await driver.findElement(By.name('pwd')).sendKeys('teamBPtestpassword1');
         await driver.findElement(By.id('loginSubmit')).click();
 
-        await driver.findElement(By.linkText('Enrollment Test Course'));
+        await driver.findElement(By.linkText('Enrollment Test Course')).click();
         await driver.findElement(By.id('submitButton')).click();
         await driver.sleep(4000);
         const testURL = await driver.getCurrentUrl();
 
-        await driver.findElement(By.linkText('Enrollment Test Course'));
+        await driver.findElement(By.linkText('Enrollment Test Course')).click();
         const buttonText = await driver.findElement(By.id('submitButton')).getText();
         await driver.get(logoutURL);
 
