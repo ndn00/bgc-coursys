@@ -8,34 +8,6 @@ const database = require('../../database');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-async function getCourseData (courseID, userID) {
-  let queryCourse = `
-  SELECT
-  id, course_name, topic, location, sessions, course_deadline,
-  seat_capacity, enabled, count(e.user_id) AS seats, min(cs.session_start) AS next_sess
-  FROM courses
-  LEFT JOIN enrollment e ON e.course_id = id
-  LEFT JOIN course_sessions cs ON cs.course_id = id
-  WHERE course_deadline >= CURRENT_DATE AND enabled=true AND cs.session_start >= CURRENT_TIMESTAMP
-  AND id = ${courseID}
-  GROUP BY id
-  ORDER BY course_deadline ASC;`
-
-  let queryPosition = `
-  SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN
-  (SELECT course_id FROM enrollment e WHERE e.user_id = ${userID} AND e2.time<=e.time ORDER BY time ASC)
-  GROUP BY course_id;
-  `;
-
-  try {
-		let courseData = await database.query(queryCourse);
-		let position = await database.query(queryPosition);
-    let allCourseData = courseData.rows.concat(position.rows);
-    return allCourseData;
-	} catch(err) {
-		return undefined
-	}
-}
 
 module.exports = {
   

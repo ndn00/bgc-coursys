@@ -27,8 +27,8 @@ module.exports = {
   
     let queryPosition = `
     SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN
-    (SELECT course_id FROM enrollment e WHERE e.user_id = $1 AND e2.time<=e.time ORDER BY time ASC)
-    GROUP BY course_id;
+  (SELECT course_id FROM enrollment e WHERE e.user_id = $1 AND e2.time<=e.time ORDER BY time ASC) AND e2.course_id=$2
+  GROUP BY course_id;
     `;
     
     console.log(userID + " " + courseID);
@@ -37,12 +37,14 @@ module.exports = {
         if(err1){
           return res.json("error querying course in course data");
         } else {
-          database.query(queryPosition, [userID], (err2, dbRes2) => {
+          database.query(queryPosition, [userID, courseID], (err2, dbRes2) => {
             if(err2){
               return res.json("error querying position in course data");
             } else {
               let rdlDate = new Date(dbRes1.rows[0].course_deadline);
               let nextDate = new Date(dbRes1.rows[0].next_sess);
+              console.log(dbRes2.rows.length);
+              console.log(response);
               var response = {
                 id: dbRes1.rows[0].id,
                 title: dbRes1.rows[0].course_name,
@@ -54,10 +56,8 @@ module.exports = {
                 maxSeats: dbRes1.rows[0].seat_capacity,
                 seats: dbRes1.rows[0].seats,
                 status: dbRes1.rows[0].enabled ? 'Open' : 'Closed',
-                position: dbRes2.rows[0].position,
+                position: dbRes2.rows.length>0 ? dbRes2.rows[0].position : 0,
               }
-              
-              response.position = dbRes2.rows[0].position;
               res.status(200).json(response);
             }
           });
