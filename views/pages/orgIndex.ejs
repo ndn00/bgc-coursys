@@ -101,26 +101,29 @@
     if (performance.navigation.type == 2) {
       location.reload(true);
     }
-    $("#tb").on('click-cell.bs.table', handleCellClick);
-
-    socket.on('courseAdd', (data) => {
-      console.log(data.course);
-      // location.reload(true);
-      addRow(data.course);
-    });
-    socket.on('courseDelete', (data) => {
-      removeRow(data.courseID);
-    });
-    socket.on('courseEnroll', (data) => {
-      $.get("/coursedata/" + data.courseID, (response, status) => {
-        updateCourse(data.courseID, response.json());
+    window.onload = () => {
+      $("#tb").on('click-cell.bs.table', handleCellClick);
+      socket.on('courseAdd', (data) => {
+        console.log(data.course);
+        // location.reload(true);
+        addRow(data.course);
       });
-    });
-    socket.on('courseWithdraw', (data) => {
-      $.get("/coursedata/" + data.courseID, (response, status) => {
-        updateCourse(data.courseID, response.json());
+      socket.on('courseDelete', (data) => {
+        removeRow(data.courseID);
       });
-    });
+      socket.on('courseEnroll', (data) => {
+        jQuery.getJSON("/coursedata/" + data.courseID, (response, status) => {
+          console.log(response);
+          updateCourse(data.courseID, response);
+        });
+      });
+      socket.on('courseWithdraw', (data) => {
+        jQuery.getJSON("/coursedata/" + data.courseID, (response, status) => {
+          console.log(response);
+          updateCourse(data.courseID, response);
+        });
+      });
+    }
   </script>
 </body>
 

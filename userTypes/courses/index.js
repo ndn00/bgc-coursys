@@ -9,6 +9,64 @@ const io = require('../../config/io').io();
 
 
 module.exports = {
+  getCourseData:  (req, res) => {
+    var courseID = req.params.id;
+    var userID = req.user.id;
+    
+    let queryCourse = `
+    SELECT
+    id, course_name, topic, location, sessions, course_deadline,
+    seat_capacity, enabled, count(e.user_id) AS seats, min(cs.session_start) AS next_sess
+    FROM courses
+    LEFT JOIN enrollment e ON e.course_id = id
+    LEFT JOIN course_sessions cs ON cs.course_id = id
+    WHERE course_deadline >= CURRENT_DATE AND enabled=true AND cs.session_start >= CURRENT_TIMESTAMP
+    AND id = $1
+    GROUP BY id
+    ORDER BY course_deadline ASC;`
+  
+    let queryPosition = `
+    SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN
+    (SELECT course_id FROM enrollment e WHERE e.user_id = $1 AND e2.time<=e.time ORDER BY time ASC)
+    GROUP BY course_id;
+    `;
+    
+    console.log(userID + " " + courseID);
+    try {
+      database.query(queryCourse, [courseID], (err1, dbRes1) => {
+        if(err1){
+          return res.json("error querying course in course data");
+        } else {
+          database.query(queryPosition, [userID], (err2, dbRes2) => {
+            if(err2){
+              return res.json("error querying position in course data");
+            } else {
+              let rdlDate = new Date(dbRes1.rows[0].course_deadline);
+              let nextDate = new Date(dbRes1.rows[0].next_sess);
+              var response = {
+                id: dbRes1.rows[0].id,
+                title: dbRes1.rows[0].course_name,
+                topic: dbRes1.rows[0].topic,
+                delivery: dbRes1.rows[0].location,
+                sessions: dbRes1.rows[0].sessions,
+                rdeadline: rdlDate.toLocaleString("en-US", {dateStyle: 'short', timeStyle: 'short'}),
+                nextSession: nextDate.toLocaleString("en-US", {dateStyle: 'short', timeStyle: 'short'}),
+                maxSeats: dbRes1.rows[0].seat_capacity,
+                seats: dbRes1.rows[0].seats,
+                status: dbRes1.rows[0].enabled ? 'Open' : 'Closed',
+                position: dbRes2.rows[0].position,
+              }
+              
+              response.position = dbRes2.rows[0].position;
+              res.status(200).json(response);
+            }
+          });
+        }
+      });
+    } catch(error) {
+      return res.status(404).json("error");
+    }
+  },
 
   renderNewCourse: (request, result) => {
     let possibleTagsQuery = `SELECT DISTINCT tag FROM tags;`;

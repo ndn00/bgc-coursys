@@ -38,7 +38,7 @@ async function getCourseData (courseID, userID) {
 }
 
 module.exports = {
-
+  
   //all login cases
   //if logged in (or submit valid login credentials), redirect to appropriate landing page
   //otherwise, render login page
