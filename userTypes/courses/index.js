@@ -12,7 +12,7 @@ module.exports = {
   getCourseData:  (req, res) => {
     var courseID = req.params.id;
     var userID = req.user.id;
-    
+
     let queryCourse = `
     SELECT
     id, course_name, topic, location, sessions, course_deadline,
@@ -24,13 +24,13 @@ module.exports = {
     AND id = $1
     GROUP BY id
     ORDER BY course_deadline ASC;`
-  
+
     let queryPosition = `
     SELECT course_id, COUNT(e2.user_id) AS position FROM enrollment e2 WHERE e2.course_id IN
   (SELECT course_id FROM enrollment e WHERE e.user_id = $1 AND e2.time<=e.time ORDER BY time ASC) AND e2.course_id=$2
   GROUP BY course_id;
     `;
-    
+
     console.log(userID + " " + courseID);
     try {
       database.query(queryCourse, [courseID], (err1, dbRes1) => {
@@ -173,7 +173,7 @@ module.exports = {
             }
             let rdlDate = new Date(insertObject[5]);
             var nextDate;
-            let queryUpdateSession = 
+            let queryUpdateSession =
             "SELECT min(cs.session_start) AS next_sess from courses LEFT JOIN course_sessions cs ON cs.course_id = id WHERE course_deadline >= CURRENT_DATE AND cs.session_start >= CURRENT_TIMESTAMP AND id = $1;";
             database.query(queryUpdateSession, [courseID], (errOutDB3, dbRes3) => {
                 if(errOutDB3){
@@ -198,7 +198,7 @@ module.exports = {
                 return res.redirect('/organizer/main');
               }
             );
-            
+
           }
         });
 
@@ -246,7 +246,8 @@ module.exports = {
               let newFinish = new Date(oldRow.session_end);
               return {
                 session_start: newStart.toLocaleString("en-US", dateFormat),
-                session_end: newFinish.toLocaleString("en-US", dateFormat)
+                session_end: newFinish.toLocaleString("en-US", dateFormat),
+                session_name: oldRow.session_name
               };
             });
             let inputObject = {
@@ -648,7 +649,7 @@ module.exports = {
       io.emit("courseDelete", {courseID: courseID});
       return res.redirect('/organizer/main')
     })
-    
+
   },
 
 
